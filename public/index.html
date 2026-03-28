@@ -20,8 +20,24 @@
 <body>
 <div id="root"></div>
 <script>
-// localStorage stub for environments where it may not be available
-window.storage = window.localStorage || { getItem:()=>null, setItem:()=>{}, removeItem:()=>{} };
+// Storage stub (localStorage-based)
+if (!window.storage) {
+  window.storage = {
+    async get(key) { const v = localStorage.getItem(key); return v ? { value: v } : null; },
+    async set(key, value) { try { localStorage.setItem(key, value); } catch(e) {} },
+    async list(prefix) {
+      try {
+        const keys = [];
+        for (let i = 0; i < localStorage.length; i++) {
+          const k = localStorage.key(i);
+          if (k && k.startsWith(prefix)) keys.push(k);
+        }
+        return { keys };
+      } catch(e) { return { keys: [] }; }
+    },
+    async remove(key) { try { localStorage.removeItem(key); } catch(e) {} },
+  };
+}
 </script>
 <script type="text/babel">
 const { useState } = React;
