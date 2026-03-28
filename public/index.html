@@ -1,0 +1,893 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>不思議な森と魔女の館の物語 ──16タイプ性格診断──</title>
+  <meta name="description" content="物語形式のMBTI性格診断。魔女の館を探索する冒険を通じて、あなたの16タイプを診断します。">
+  <meta property="og:title" content="不思議な森と魔女の館の物語 ──16タイプ性格診断──">
+  <meta property="og:description" content="魔女の館を探索する冒険を通じて、あなたの16タイプを診断します。">
+  <meta property="og:image" content="/images/title_main_horizontal.png">
+  <meta property="og:type" content="website">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="不思議な森と魔女の館の物語 ──16タイプ性格診断──">
+  <meta name="twitter:image" content="/images/title_main_horizontal.png">
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { background: #0f0c1a; }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+  <script>
+    // Storage stub (localStorage-based)
+    if (!window.storage) {
+      window.storage = {
+        async get(key) {
+          try { const v = localStorage.getItem(key); return v ? { value: v } : null; } catch(e) { return null; }
+        },
+        async set(key, value) {
+          try { localStorage.setItem(key, value); } catch(e) {}
+        },
+        async list(prefix) {
+          try {
+            const keys = [];
+            for (let i = 0; i < localStorage.length; i++) {
+              const k = localStorage.key(i);
+              if (k && k.startsWith(prefix)) keys.push(k);
+            }
+            return { keys };
+          } catch(e) { return { keys: [] }; }
+        }
+      };
+    }
+  </script>
+  <script type="text/babel">
+    const { useState } = React;
+// ============================================================
+// DATA
+// ============================================================
+
+const JOBS = [
+  { id:"knight",    label:"⚔️ 騎士",    image: "/images/job_knight.png" },
+  { id:"detective", label:"🔍 探偵",    image: "/images/job_detective.png" },
+  { id:"alchemist", label:"⚗️ 錬金術師", image: "/images/job_alchemist.png" },
+  { id:"scholar",   label:"📖 魔法学者", image: "/images/job_scholar.png" },
+  { id:"bard",      label:"🎭 吟遊詩人", image: "/images/job_bard.png" },
+  { id:"stargazer", label:"🌙 星読み",   image: "/images/job_stargazer.png" },
+];
+
+const ITEMS1 = [
+  { id:"map",     label:"🗺️ 古い地図",   desc:"森の地形が記されている。道に迷わないための羅針盤",            scores:{T:1} },
+  { id:"lantern", label:"🕯️ ランタン",   desc:"暗闇を照らす。足元を確認しながら慎重に進める",               scores:{S:1} },
+  { id:"herb",    label:"🌿 薬草束",     desc:"傷や毒に効く。自分や誰かが傷ついたときのために",              scores:{F:1,S:1} },
+  { id:"crystal", label:"🔮 水晶玉",     desc:"魔法の気配を感じ取れる。敵の正体を見破る力がある",            scores:{N:1,I:1} },
+  { id:"music",   label:"🎵 小さな楽器", desc:"相手の警戒を解き、心を開かせるための交渉道具",               scores:{E:1} },
+  { id:"wand",    label:"🪄 魔法の杖",   desc:"未知の魔法を防ぐことができる。使い方は歩きながら覚えよう",     scores:{N:1} },
+  { id:"sword",   label:"🗡️ 小剣",       desc:"いざというときの護身用。最後の頼りになる",                   scores:{J:1} },
+];
+
+const ITEM1_GROUP_TEXTS = {
+  NT: "理性と意志を道連れに、あなたは森へ向かうことにした。",
+  NF: "見えない力を信じて、あなたは森へ向かうことにした。",
+  ST: "確かなものを頼りに、あなたは森へ向かうことにした。",
+  SF: "やさしさを胸に抱いて、あなたは森へ向かうことにした。",
+  N:  "見えないものへの好奇心を胸に、あなたは森へ向かうことにした。",
+  S:  "五感を研ぎ澄ませて、あなたは森へ向かうことにした。",
+  MIX:"選び抜いたものを胸に、あなたは森へ向かうことにした。",
+};
+
+function getItem1GroupText(selectedIds) {
+  const items = ITEMS1.filter(i => selectedIds.includes(i.id));
+  let T=0, F=0, N=0, S=0;
+  for (const item of items) {
+    const s = item.scores;
+    if (s.T) T++;
+    if (s.F) F++;
+    if (s.N) N++;
+    if (s.S) S++;
+  }
+  const isN = N > S;
+  const isS = S > N;
+  const isT = T > F;
+  const isF = F > T;
+  if (isN && isT) return ITEM1_GROUP_TEXTS.NT;
+  if (isN && isF) return ITEM1_GROUP_TEXTS.NF;
+  if (isS && isT) return ITEM1_GROUP_TEXTS.ST;
+  if (isS && isF) return ITEM1_GROUP_TEXTS.SF;
+  if (isN) return ITEM1_GROUP_TEXTS.N;
+  if (isS) return ITEM1_GROUP_TEXTS.S;
+  return ITEM1_GROUP_TEXTS.MIX;
+}
+
+const ITEMS2 = [
+  { id:"diary",  label:"📔 魔女の研究日誌", desc:"魔女の研究の記録。緻密な文字がびっしりと並んでいる",              reaction:"魔女の思考の痕跡が、緻密な文字の中に刻まれている。",             scores:{T:1,J:1} },
+  { id:"bottle", label:"⚗️ 謎の薬瓶",      desc:"正体不明の液体が入っている。何かの実験に使われたものか",           reaction:"正体不明の液体は、かすかに光を帯びている気がした。",             scores:{T:1,S:1} },
+  { id:"key",    label:"🗝️ 古い鍵",        desc:"どこかの扉を開く鍵のようだ。館の奥に続く部屋があるのかもしれない",  reaction:"この鍵で開く扉が、館のどこかにある。そんな気がする。",           scores:{S:1,J:1} },
+  { id:"magic",  label:"🕸️ 魔法陣の写し",  desc:"複雑な魔法陣が描かれた紙。魔女の使う魔法の手がかりになるかもしれない", reaction:"複雑な紋様は、何かを訴えかけるように目に焼きついた。",         scores:{T:1,N:1} },
+];
+
+const ITEMS3 = [
+  { id:"moon",   label:"🌙 月の石",   desc:"冷たく青白く光る不思議な石。どこか懐かしい光を帯びている",            reaction:"冷たく青白い光が、手のひらに静かに収まった。",                  scores:{N:1,I:1} },
+  { id:"eye",    label:"👁️ 瞳の絵画", desc:"誰かの瞳を描いた小さな絵。どこから見ても視線が合う気がする",          reaction:"どこから見ても視線が合う気がする。この瞳は何を見ていたのだろう。", scores:{I:1,S:1} },
+  { id:"mirror", label:"🪞 歪んだ鏡", desc:"歪んだ形の手鏡。映る自分の姿が、どこか違って見える",                  reaction:"鏡に映る自分はいつもとは別人のようだった。",                    scores:{F:1,P:1} },
+  { id:"candle", label:"🕯️ 燭台",    desc:"まだ蝋の残る燭台。つい最近まで誰かがここを歩いていた証拠かもしれない",  reaction:"蝋燭の温もりがまだ残っている。ついさっきまで、誰かがここにいた。", scores:{S:1,J:1} },
+];
+
+const ITEMS4 = [
+  { id:"flower",   label:"🌹 枯れない花",        desc:"色鮮やかなまま咲き続けている不思議な花。魔法がかけられているのかもしれない", reaction:"色褪せることなく咲き続ける花。誰かの祈りが込められているようだった。",    scores:{F:1,N:1} },
+  { id:"necklace", label:"📿 お守りのネックレス", desc:"子どもを守るために誰かが置いていったのだろうか",                            reaction:"誰かの祈りが込められたネックレス。この場所に、希望が残されていた。",      scores:{F:1,N:1} },
+  { id:"doll",     label:"🪆 優しげな人形",       desc:"手作りの人形。子どもの話し相手になっていたのかもしれない",                  reaction:"手作りの人形は、まるで子どもを見守るように部屋の隅に座っていた。",      scores:{E:1,P:1} },
+  { id:"drawing",  label:"🎨 子どもの描いた絵",   desc:"この部屋で描かれたらしい絵。館の様子や人物が描かれている",                  reaction:"無邪気な線で描かれた館と人物。この子にとって、ここはどんな場所だったのだろう。", scores:{E:1,P:1} },
+];
+
+// CHAPTER INTROS - shown at chapter start
+const CHAPTER_INTROS = {
+  "第1章：街の噂":     { text: "魔女の館について、街では様々な噂が飛び交っていた。",             image: "/images/chapter1_town.png" },
+  "第2章：森への道":    { text: "街を後にして、あなたは深い森に足を踏み入れた。",                image: "/images/chapter2_forest.png" },
+  "第3章：魔女の館":    { text: "霧を抜けると、鉄の門に囲まれた古い館が現れた。",               image: "/images/chapter3_mansion.png" },
+  "第4章：魔女との対峙": { text: "不意に足音が響いた。ついに魔女と対峙する時が来た。", image: "/images/chapter4_confrontation.png" },
+};
+
+const QUESTIONS = [
+  {
+    id:"prologue_q", chapter:"プロローグ",
+    text:"あなたは旅支度に取り掛かった。\nとはいえ見知らぬ森に向かう時、どんな準備をすれば良いだろう。",
+    a:{ label:"まず情報を整理して、計画を立ててから出発する", scores:{J:1},
+        reaction:"やるべきことを決めてから、足を踏み出す。事前の計画があなたの旅を支える。" },
+    b:{ label:"すぐ出発して、道中や街で情報を集めることにする", scores:{P:1},
+        reaction:"考えるより先に足は動いていた。必要なことは、歩きながら覚えていけばいい。" },
+  },
+  {
+    id:"q0", chapter:"プロローグ",
+    text:"支度を終えて街に向かう途中、同じ方向に向かう陽気な旅人を見かけた。特に重要な情報を持っている様子はないがーー",
+    a:{ label:"相手のペースに合わせ、話しながら行く", scores:{E:1},
+        reaction:"道を同じくする者なら、誰とでも仲間になれる。あなたはそう信じている。" },
+    b:{ label:"軽く会釈して、ひとりで先を急ぐ", scores:{I:1},
+        reaction:"ひとりで行く道は穏やかな静けさがある。あなたはそれを心地よく思った。" },
+  },
+  {
+    id:"q1", chapter:"第1章：街の噂",
+    text:"見知らぬ街に足を踏み入れた。広場には大勢の人が集まり、なにやら噂話をしているようだ。",
+    a:{ label:"広場に近づいて、直接話を聞いてみる", scores:{E:1},
+        reaction:"広場の賑わいの中へ、迷わず足を踏み入れた。あなたの旅は、いつだって人の声から始まる。" },
+    b:{ label:"人混みを避け、街の様子を探ってみる", scores:{I:1},
+        reaction:"まずは遠くから眺めてみる。風の流れを読むように、あなたは街の空気を感じ取った。" },
+  },
+  {
+    id:"q2", chapter:"第1章：街の噂",
+    text:"立ち寄った食堂で、隣に座った男が「魔女に娘を連れ去られた」と泣き出した。テーブルのほうからは「あの娘は自分で出て行ったんじゃないか？」と囁く声も聞こえてくる。",
+    a:{ label:"冷静に問いただす。事実を正確に知りたい", scores:{T:1},
+        reaction:"涙よりも言葉を、感情よりも事実を。あなたは静かに、話の糸口を手繰り寄せた。" },
+    b:{ label:"慰めながら、ゆっくりと話を引き出す", scores:{F:1},
+        reaction:"言葉にならない悲しみに、そっと寄り添った。真実はいつも、人の心の奥に宿っている。" },
+  },
+  {
+    id:"q3", chapter:"第1章：街の噂",
+    text:"街の人々の魔女に関する見解はふたつに割れていた。「魔女は悪だ」という者と「魔女は無害だ」という者。",
+    a:{ label:"実際の目撃情報や残された証拠を重視して判断する", scores:{S:1},
+        reaction:"見えているものを、まず信じる。霧の中でも、足元の石は確かにそこにある。" },
+    b:{ label:"現実味のない噂話にも、真実が隠されているものだ", scores:{N:1},
+        reaction:"どちらの声にも、真実と幻想が混ざり合っている。あなたにはなぜか、そう感じられた。" },
+  },
+  {
+    id:"q4", chapter:"第1章：街の噂",
+    text:"道具を鞄に詰めていると、宿屋の主人から「魔女の館に向かうなら、暗くなる前に着くようにな」と言われた。しかし、今はまだ昼前だ。",
+    a:{ label:"すぐに出発する。時間には余裕があったほうが良い", scores:{J:1},
+        reaction:"善は急げだ。余裕のあるうちに行動に移すのが、あなたのやり方だ。" },
+    b:{ label:"もう少し街で情報を集めてから、出発することにしよう", scores:{P:1},
+        reaction:"急ぐことはない。知るべきことが、まだこの街にあるかもしれない。" },
+  },
+  {
+    id:"q5", chapter:"第2章：森への道",
+    text:"森に入ると道が三叉路に分かれていた。街の人から「北に進めば館に着く」と聞いていたが、木々が空を覆い、方角がわからない。",
+    a:{ label:"周囲を観察して、手がかりを探す", scores:{J:1},
+        reaction:"焦らず、立ち止まる。苔の生え方、木の傾き——森はいつも、静かに答えを語っている。" },
+    b:{ label:"自分の感覚を信じ、進む道を選ぶ", scores:{P:1},
+        reaction:"理屈より先に、足が動いた。あなたの直感は、いつも思わぬ道を見つけ出す。" },
+  },
+  {
+    id:"q6", chapter:"第2章：森への道",
+    text:"森のなかを進んでいくと、奇妙な光が木々の間をすり抜けていった。",
+    a:{ label:"光の通り道の周囲に、足跡や痕跡がないか探す", scores:{S:1},
+        reaction:"光の残した痕跡を、ひとつひとつ確かめていく。見えないものより、見えるものを信じる。" },
+    b:{ label:"魔女に誘われているような気がして、後を追う", scores:{N:1},
+        reaction:"光は語りかけるように揺れていた。あなたはただ、その導きに身を委ねた。" },
+  },
+  {
+    id:"q7", chapter:"第2章：森への道",
+    text:"館まであと少しというところで、通り雨が降り出した。空を見上げると、日が傾き始めている。",
+    a:{ label:"雨宿りせず、濡れながら先を急ぐ", scores:{J:1},
+        reaction:"雨など構っていられない。濡れながら歩き続ける。目指す場所がある限り、足は止まらない。" },
+    b:{ label:"近くの木の下で雨が止むのを待つ", scores:{P:1},
+        reaction:"雨の音に耳を澄ませながら、木陰に身を寄せた。急ぐより、流れに任せたほうがよいこともある。" },
+  },
+  {
+    id:"q8", chapter:"第2章：森への道",
+    text:"再び歩き始めると、突然あたりが霧に包まれた。どこからともなく花の香りが漂ってくる。",
+    a:{ label:"香りの正体を探るより、早く霧を抜けることを優先する", scores:{S:1},
+        reaction:"惑わされず、ただ前へ。霧の中でも、あなたの足取りに迷いはなかった。" },
+    b:{ label:"香りは館から来ているのかもしれない。匂いを辿って進む", scores:{N:1},
+        reaction:"花の香りが細い糸のように道を示していた。あなたはその導きを信じた。" },
+  },
+  {
+    id:"q9", chapter:"第3章：魔女の館",
+    text:"霧を抜けると、鉄の門に囲まれた古い館が姿を現した。重たげな扉に触れると、扉はきしみながら開いた。",
+    a:{ label:"罠がないか確認しながら、慎重に足を踏み入れる", scores:{T:1},
+        reaction:"ひとつずつ、確かめながら進む。慎重さこそが、この館では最大の武器になる。" },
+    b:{ label:"誰かいるか？と声を掛けながら、足を踏み入れる", scores:{F:1},
+        reaction:"開かれた扉は招待状のようだ。あなたはためらわず、その奥へと踏み込んだ。" },
+  },
+  {
+    id:"q10", chapter:"第3章：魔女の館",
+    text:"書斎で大量の研究ノートを発見した。読み解くには時間がかかりそうだ。",
+    a:{ label:"重要そうなページを素早く読み込んで、証拠を探す", scores:{S:1},
+        reaction:"必要なことだけを素早く把握する。時間は有限、無駄にはできない。" },
+    b:{ label:"全体を眺めて、研究の目的や意図を読み取ろうとする", scores:{N:1},
+        reaction:"ページをめくるたびに、巨大な意図の輪郭が浮かび上がる気がした。" },
+  },
+  {
+    id:"q11", chapter:"第3章：魔女の館",
+    text:"奥の部屋で行方不明になっていた子どもを発見した。子どもに怪我はないようだ。",
+    a:{ label:"子どもを安全な場所に逃がし、状況を整理する", scores:{T:1},
+        reaction:"子どもの手を引き、安全な場所へ。感情より先に、すべきことがある。" },
+    b:{ label:"子どもに寄り添って、ここであったことを聞く", scores:{F:1},
+        reaction:"怯えた瞳に、そっと寄り添った。この子が感じた恐怖を、まず受け止めたかった。" },
+  },
+  {
+    id:"q12", chapter:"第4章：魔女との対峙",
+    text:"そのとき魔女が現れた。あなたを見て魔女は静かに言う。「ようやく来たのね」",
+    a:{ label:"すぐに魔女に話しかける。聞きたいことは山ほどある", scores:{E:1},
+        reaction:"言葉が溢れ出した。この出会いをあなたはずっと待っていたのかもしれない。" },
+    b:{ label:"魔女の出方をうかがう。自分を待っていたのだろうか？", scores:{I:1},
+        reaction:"冷静に出方を窺い、それから動く。あなたの沈黙がこの場の空気を支配した。" },
+  },
+  {
+    id:"q13", chapter:"第4章：魔女との対峙",
+    text:"魔女はあなたに静かに問いかけた。「私が何をしたか、本当に知っているの？」",
+    a:{ label:"考えを話す。間違いがあれば指摘してほしい", scores:{T:1},
+        reaction:"仮説を並べて、検証する。そうやって、あなたは真実に近づいてきた。" },
+    b:{ label:"あなた自身の言葉で、正直に話してほしい", scores:{F:1},
+        reaction:"答えを押し付けるより、まずは話を。あなたの言葉が真実への扉を開く。" },
+  },
+  {
+    id:"q14", chapter:"第4章：魔女との対峙",
+    text:"魔女は語り始めた。彼女の話はあなたの想像とはまったく異なるものだった。",
+    a:{ label:"質問を挟みながら対話するように聞く", scores:{E:1},
+        reaction:"問いを重ねることで、ふたりの間には、理解が積み重なっていった。" },
+    b:{ label:"口を挟まず、最後まで静かに話を聞く", scores:{I:1},
+        reaction:"言葉を飲み込み、耳を傾ける。魔女の声が静かな部屋に満ちていった。" },
+  },
+  {
+    id:"q15", chapter:"第4章：魔女との対峙",
+    text:"魔女の話を聞き終えた。あなたはどう動く？",
+    a:{ label:"聞いた話をもとに、自分なりの結論を出す", scores:{J:1},
+        reaction:"すべて聞き終えたとき、答えはもう決まっていた。あなたの中で、静かに。" },
+    b:{ label:"まだ判断できない。もう少し時間が必要だ", scores:{P:1},
+        reaction:"急いで答えを出すことはない。本当のことは、もう少し先にある気がした。" },
+  },
+];
+
+const ENDING = {
+  chapter:"エンディング",
+  text:"魔女の話を聞き終えたあなたは、選択を迫られた。",
+  a:{ label:"魔女のもとに留まり、真実を見届ける", scores:{N:1,P:1},
+      reaction:"あなたは魔女の館に残ることを選んだ。旅の終わりが、新たな物語の始まりとなった。" },
+  b:{ label:"街へ戻って、自分の役割を果たす", scores:{S:1,J:1},
+      reaction:"来た道を振り返り、あなたは歩き出した。使命を果たすことが、あなたの答えだった。" },
+};
+
+// ============================================================
+// EPILOGUE
+// ============================================================
+function getGroup(type) {
+  const N = type[1] === "N", T = type[2] === "T";
+  if (N && T) return "NT";
+  if (N && !T) return "NF";
+  if (!N && T) return "ST";
+  return "SF";
+}
+
+const EPILOGUES = {
+  NT: {
+    stay: "あなたは館に残り、魔女の研究をともに完成させることを決意した。ふたりは感情に流されず、確かな意志を持って、来るべき未来のための研究を続けていった。",
+    return: "あなたは街へ戻り、魔女から得た知識を世界へ伝えた。あなたが直観的に悟り、理論によって裏づけたこの世界の真実は、やがて多くの人々の手に渡り、新たな時代の礎となった。",
+  },
+  NF: {
+    stay: "あなたは館に残り、魔女の孤独に寄り添ってともに生きることを選んだ。やがてふたりの間には深い絆が生まれた。対話によって深い思想が育まれ、館はいつしか迷える者が辿り着く場所となった。",
+    return: "あなたは街へ戻り、魔女の真実を語り続けた。初めは誰も信じなかったが、あなたは決して諦めなかった。真摯に紡がれた言葉はやがて人々の心に届き、魔女に対する誤解は少しずつ解けていった。",
+  },
+  ST: {
+    stay: "あなたは館に残り、そこに秩序をもたらすことを選んだ。感情より規律を、曖昧さより明確さを。あなたは魔女の隣に立ち、力を合わせて館をこの地方の要所へと作り変えていった。",
+    return: "あなたは街へ戻り、依頼主に事実をありのまま報告した。感情を交えずに見たままを伝え、秩序を守るための役割を果たす。それがあなたの誠実さだった。",
+  },
+  SF: {
+    stay: "あなたは館に残り、魔女と街の橋渡しをすることにした。あなたは魔女に代わって街の人々と話し合い、少しずつ、丁寧に誤解を解いていった。その歩みは遅くとも、確かに世界を変えていった。",
+    return: "あなたは街へ戻り、魔女の話を胸に秘めたまま人々の暮らしを守り続けた。いつかこの街の準備が整った時、魔女と街の人々はわかり合える。あなたはその時が来るのを静かに待つことにした。",
+  },
+};
+
+// ============================================================
+// TYPE RESULTS
+// ============================================================
+const TYPE_RESULTS = {
+  INTJ:{ name:"戦略家",         witch:"魔女は孤独な研究者だった。街で起こっている不審な出来事は、世界を脅かす未知の脅威から人々を守るための苦肉の策。魔女の研究が完成すれば、世界を救う魔法になる——あなたはその真実を、論理と直感で見抜いた。" },
+  INTP:{ name:"論理学者",       witch:"魔女の行動の背景には、複雑だが筋の通ったロジックが隠されていた。街で起こっていた表面的な悪事の裏には、魔女の壮大な知的探求心が潜んでいた。あなたはその関連性を、静かに解き明かした。" },
+  ENTJ:{ name:"指揮官",         witch:"魔女は極めて冷徹な戦略家だった。短期的な犠牲を厭わず、長期的な視点からこの世界の均衡を守ろうとしていた。あなたはその意図を見抜き、魔女と手を組むことにした。" },
+  ENTP:{ name:"討論者",         witch:"魔女は既存の秩序への挑戦者だった。この世界の常識をひっくり返すような発明を、孤独に研究し続けていた。あなたはその革新性に、魅せられた。" },
+  INFJ:{ name:"提唱者",         witch:"魔女は深く傷ついた予言者だった。未来に訪れる災厄を知りながら、誰にも信じてもらえず、孤独に戦っていた。あなたはその孤独に寄り添った。" },
+  INFP:{ name:"仲介者",         witch:"魔女は誰よりも優しい存在だった。街から子どもを攫っていたのは、行き場のない子どもたちを守り、居場所を与えるためだった。あなたはその愛を感じ取った。" },
+  ENFJ:{ name:"主人公",         witch:"魔女は誰も気づかない形で、人々を繋いでいた。孤立した村と村の橋渡しを、陰で続けていた。子どもたちは魔女の理想に惹かれて、自ら魔女の元に留まっていたようだ。あなたはその献身を見抜いた。" },
+  ENFP:{ name:"運動家",         witch:"魔女は自由を愛する魂だった。決まりごとやしがらみに縛られた世界から、子どもたちを解放しようとしていた。あなたは自由を求めるその想いに共鳴した。" },
+  ISTJ:{ name:"管理者",         witch:"魔女は古の契約を守る番人だった。誰にも知られることなく、古き時代から続くこの世界の秩序を維持し続けていた。あなたは魔女が尊いものとする、その規律を理解した。" },
+  ISFJ:{ name:"擁護者",         witch:"魔女は記憶の守り人だった。失われた者たちの記憶を館に集め、消えないよう守り、子どもたちに語り続けていた。あなたはその献身を感じ取った。" },
+  ESTJ:{ name:"幹部",           witch:"魔女は秩序の執行者だった。表の法では裁けない悪を自らの手で粛清し、行き場をなくした子どもたちを保護していた。あなたはその正義を認めた。" },
+  ESFJ:{ name:"領事",           witch:"魔女はこの地方一帯を影で支える実力者だった。この館に自分と繋がりのある人々を招待して結びつけ、人と人の絆を守り続けていた。あなたはその温かさを感じ取った。" },
+  ISTP:{ name:"巨匠",           witch:"魔女は孤高の職人だった。誰にも邪魔されず、究極の魔法道具を求めて、発明を続けていた。あなたは魔女の手から溢れ出す、その技術に敬意を抱いた。" },
+  ISFP:{ name:"冒険家",         witch:"魔女は美しいものを愛する芸術家だった。館のなかは彼女の作品で満ちていて、無垢な子どもたちは魔女のモデルだった。あなたは魔女が生み出すその世界に魅了された。" },
+  ESTP:{ name:"起業家",         witch:"魔女は危険な賭けに挑む冒険者だった。世間が認めないような大きなリスクを冒して、より大きく価値のある何かを手に入れようとしていた。あなたはその胆力を認めた。" },
+  ESFP:{ name:"道化師",         witch:"魔女は世界に喜びをもたらす存在だった。子どもたちの灰色の日常に色を添えるために、少し強引な方法を選んでいたにすぎなかった。あなたはその底なしの明るさを愛した。" },
+};
+
+// ============================================================
+// UTILS
+// ============================================================
+function addScores(total, scores) {
+  const next = { ...total };
+  for (const [k, v] of Object.entries(scores)) next[k] = (next[k]||0) + v;
+  return next;
+}
+
+function calcType(scores, lateJP, lateEI) {
+  const e = scores.E||0, i = scores.I||0;
+  const EI = e !== i ? (e > i ? "E" : "I") : (lateEI || "I");
+  const NS = (scores.N||0) > (scores.S||0) ? "N" : "S";
+  const TF = (scores.T||0) > (scores.F||0) ? "T" : "F";
+  const JP = (scores.J||0) !== (scores.P||0)
+    ? ((scores.J||0) > (scores.P||0) ? "J" : "P")
+    : lateJP || "P";
+  return EI + NS + TF + JP;
+}
+
+// ============================================================
+// APP
+// ============================================================
+// 結果送信先API URL
+const RESULT_API_URL = '/api/result';
+
+// ============================================================
+function App() {
+  const [step, setStep] = useState("intro");
+  const [scores, setScores] = useState({ E:0,I:0,N:0,S:0,T:0,F:0,J:0,P:0 });
+  const [lateJP, setLateJP] = useState(null);
+  const [lateEI, setLateEI] = useState(null);
+  const [reaction, setReaction] = useState("");
+  const [showReaction, setShowReaction] = useState(false);
+  const [item1Selected, setItem1Selected] = useState([]);
+  const [answers, setAnswers] = useState({});
+  const [pendingNext, setPendingNext] = useState(null);
+  const pendingNextRef = React.useRef(null);
+  const pendingTimerRef = React.useRef(null);
+
+  function setPendingNextWithTimer(fn) {
+    // 既存タイマーをキャンセル
+    if (pendingTimerRef.current) {
+      clearTimeout(pendingTimerRef.current);
+      pendingTimerRef.current = null;
+    }
+    setPendingNext(() => fn);
+    pendingNextRef.current = fn;
+    pendingTimerRef.current = setTimeout(() => {
+      if (pendingNextRef.current) {
+        const f = pendingNextRef.current;
+        pendingNextRef.current = null;
+        pendingTimerRef.current = null;
+        setPendingNext(null);
+        f();
+      }
+    }, 5000);
+  }
+  const [resultType, setResultType] = useState(null);
+  const [endingChoice, setEndingChoice] = useState(null);
+  const [logs, setLogs] = useState([]);
+  const [showLogs, setShowLogs] = useState(false);
+  const [shownChapters, setShownChapters] = useState(new Set());
+  const [showChapterIntro, setShowChapterIntro] = useState(false);
+  const [storageLoaded, setStorageLoaded] = useState(false);
+
+  // 起動時に永続ストレージからログを読み込む
+  useState(() => {
+    if (!window.storage) { setStorageLoaded(true); return; }
+    window.storage.list("log:").then(result => {
+      if (!result || !result.keys || !result.keys.length) {
+        setStorageLoaded(true);
+        return;
+      }
+      Promise.all(
+        result.keys.map(k =>
+          window.storage.get(k).then(r => {
+            try { return r ? JSON.parse(r.value) : null; } catch(e) { return null; }
+          }).catch(() => null)
+        )
+      ).then(entries => {
+        const valid = entries.filter(Boolean).sort((a, b) => a.time > b.time ? 1 : -1);
+        if (valid.length) setLogs(valid);
+        setStorageLoaded(true);
+      });
+    }).catch(() => setStorageLoaded(true));
+  });
+
+  // CSVテキスト生成
+  function getCSVText() {
+    const qIds = ["prologue_q","q0","q1","q2","q3","q4","q5","q6","q7","q8","q9","q10","q11","q12","q13","q14","q15","ending"];
+    const itemIds = ["job","item1","item2","item3","item4"];
+    const header = ["日時","タイプ","タイプ名","エンディング", ...itemIds, ...qIds].join(",");
+    const rows = logs.map(l => {
+      const base = '"' + l.time + '","' + l.type + '","' + (TYPE_RESULTS[l.type] ? TYPE_RESULTS[l.type].name : "") + '","' + l.ending + '"';
+      const items = itemIds.map(id => l.answers ? (l.answers[id] || "") : "").join(",");
+      const ans = qIds.map(id => l.answers ? (l.answers[id] || "") : "").join(",");
+      return base + "," + items + "," + ans;
+    });
+    return [header, ...rows].join("\n");
+  }
+  const [currentChapterIntro, setCurrentChapterIntro] = useState(null);
+
+  const qIndex = QUESTIONS.findIndex(q => q.id === step);
+  const currentQ = qIndex >= 0 ? QUESTIONS[qIndex] : null;
+
+  function maybeShowChapter(chapter, cb) {
+    const intro = CHAPTER_INTROS[chapter];
+    if (chapter && intro && !shownChapters.has(chapter)) {
+      setShownChapters(prev => new Set([...prev, chapter]));
+      setCurrentChapterIntro({ chapter, text: intro.text, image: intro.image });
+      setShowChapterIntro(true);
+      setTimeout(() => {
+        setShowChapterIntro(false);
+        setCurrentChapterIntro(null);
+        cb();
+      }, 3500);
+    } else {
+      cb();
+    }
+  }
+
+  function handleJobSelect(job) {
+    setScores(s => s);
+    setAnswers(prev => ({ ...prev, job: job.id }));
+    setStep("job_flavor");
+    setTimeout(() => {
+      setStep("prologue_q");
+    }, 2500);
+  }
+
+  function handleAnswer(choice, q, nextStep) {
+    const chosen = choice === "a" ? q.a : q.b;
+    const newScores = addScores(scores, chosen.scores);
+    setScores(newScores);
+    setAnswers(prev => ({ ...prev, [q.id]: choice }));
+    if (["q13","q14","q15"].includes(q.id)) {
+      if (chosen.scores.J) setLateJP("J");
+      else if (chosen.scores.P) setLateJP("P");
+    }
+    if (["q12","q14"].includes(q.id)) {
+      if (chosen.scores.E) setLateEI("E");
+      else if (chosen.scores.I) setLateEI("I");
+    }
+    setReaction(chosen.reaction);
+    setShowReaction(false);
+    setTimeout(() => {
+      setShowReaction(true);
+      setPendingNextWithTimer(() => {
+        setShowReaction(false);
+        pendingNextRef.current = null;
+        const nextQ = QUESTIONS.find(q => q.id === nextStep);
+        if (nextQ) {
+          maybeShowChapter(nextQ.chapter, () => setStep(nextStep));
+        } else {
+          setStep(nextStep);
+        }
+      });
+    }, 0);
+  }
+
+  function handleEndingAnswer(choice) {
+    const chosen = choice === "a" ? ENDING.a : ENDING.b;
+    const newScores = addScores(scores, chosen.scores);
+    if (chosen.scores.J) setLateJP("J");
+    else if (chosen.scores.P) setLateJP("P");
+    setScores(newScores);
+    setEndingChoice(choice);
+    const allAnswers = { ...answers, ending: choice };
+    setAnswers(allAnswers);
+    setReaction(chosen.reaction);
+    setShowReaction(true);
+    setPendingNextWithTimer(() => {
+      setShowReaction(false);
+      pendingNextRef.current = null;
+      const type = calcType(newScores, lateJP, lateEI);
+      setResultType(type);
+      const now = new Date();
+      const entry = {
+        type,
+        ending: choice === "a" ? "留まる" : "街へ戻る",
+        time: now.toLocaleString("ja-JP"),
+        answers: allAnswers,
+      };
+      setLogs(prev => [...prev, entry]);
+      try { window.storage.set("log:" + now.getTime(), JSON.stringify(entry)); } catch(e) {}
+      sendResult(entry);
+      setStep("result");
+    });
+  }
+
+  function handleItem1Confirm() {
+    let s = { ...scores };
+    for (const id of item1Selected) {
+      const item = ITEMS1.find(i => i.id === id);
+      if (item) s = addScores(s, item.scores);
+    }
+    setScores(s);
+    setAnswers(prev => ({ ...prev, item1: item1Selected.join(",") }));
+    const groupText = getItem1GroupText(item1Selected);
+    setItem1Selected([]);
+    setReaction(
+      item1Selected.map(id => ITEMS1.find(i => i.id === id)?.label.split(" ").slice(1).join(" ")).join("、") +
+      "を手に取った。\n\n" + groupText
+    );
+    setShowReaction(true);
+    setPendingNextWithTimer(() => {
+      setShowReaction(false);
+      pendingNextRef.current = null;
+      setStep("q4");
+    });
+  }
+
+  function handleSingleItem(item, nextStep, itemKey) {
+    setScores(s => addScores(s, item.scores));
+    if (itemKey) setAnswers(prev => ({ ...prev, [itemKey]: item.id }));
+    setReaction(item.reaction);
+    setShowReaction(true);
+    setPendingNextWithTimer(() => {
+      setShowReaction(false);
+      pendingNextRef.current = null;
+      const nextQ = QUESTIONS.find(q => q.id === nextStep);
+      if (nextQ) {
+        maybeShowChapter(nextQ.chapter, () => setStep(nextStep));
+      } else {
+        setStep(nextStep);
+      }
+    });
+  }
+
+  // Notion APIに結果を送信
+  async function sendResult(entry) {
+    if (!RESULT_API_URL) return;
+    try {
+      const ans = entry.answers || {};
+      const payload = {
+        type: entry.type,
+        typeName: TYPE_RESULTS[entry.type] ? TYPE_RESULTS[entry.type].name : "",
+        ending: entry.ending,
+        job: ans.job || "",
+        item1: ans.item1 || "",
+        item2: ans.item2 || "",
+        item3: ans.item3 || "",
+        item4: ans.item4 || "",
+        answers: ans,
+        playedAt: new Date().toISOString(),
+      };
+      await fetch(RESULT_API_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+    } catch(e) {
+      console.warn('送信エラー:', e);
+    }
+  }
+
+  function restart() {
+    setStep("intro");
+    setScores({ E:0,I:0,N:0,S:0,T:0,F:0,J:0,P:0 });
+    setLateJP(null);
+    setLateEI(null);
+    setReaction("");
+    setShowReaction(false);
+    setItem1Selected([]);
+    setResultType(null);
+    setAnswers({});
+    setShownChapters(new Set());
+    setShowChapterIntro(false);
+    setCurrentChapterIntro(null);
+  }
+
+  function getNextStep(current) {
+    const map = { prologue_q:"q0", q0:"q1", q1:"q2", q2:"q3", q3:"item1", q4:"q5", q5:"q6", q6:"q7", q7:"q8", q8:"q9", q9:"item2", q10:"item3", q11:"item4", q12:"q13", q13:"q14", q14:"q15", q15:"ending" };
+    return map[current] || "ending";
+  }
+
+  const typeData = resultType ? TYPE_RESULTS[resultType] : null;
+
+  return (
+    <div style={S.bg}>
+      <style>{`
+        @keyframes fadeIn { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
+        @media (max-width: 480px) {
+          .wt-card { padding: 1.5rem 1rem !important; }
+          .wt-title { font-size: 1.3rem !important; }
+          .wt-question { font-size: 0.92rem !important; margin-bottom: 1.2rem !important; }
+          .wt-optBtn { font-size: 0.85rem !important; padding: 1rem 0.8rem !important; }
+          .wt-itemGrid { gap: 0.4rem !important; }
+          .wt-itemBtn { padding: 0.6rem 0.4rem !important; }
+          .wt-itemDesc { font-size: 0.62rem !important; }
+          .wt-resultType { font-size: 2.2rem !important; }
+          .wt-btn { padding: 0.7rem 1.5rem !important; }
+        }
+        @media (max-width: 360px) {
+          .wt-itemGrid { grid-template-columns: 1fr !important; }
+        }
+      `}</style>
+      <div style={S.stars}>{"✦ ✧ ✦ ✧ ✦ ✧ ✦ ✧ ✦"}</div>
+      <div style={S.card} className="wt-card">
+
+        {/* INTRO */}
+        {step === "intro" && (
+          <FadeIn>
+            <img src="/images/title_main_vertical.png" alt="不思議な森と魔女の館の物語" style={S.titleImg} />
+            <h1 style={S.title} className="wt-title">不思議な森と魔女の館の物語</h1>
+            <p style={S.witchLabel}>——16タイプ性格診断——</p>
+            <p style={S.body}>{"深い森の奥にひっそりとたたずむ魔女の館。\n近隣に住む者が次々と失踪し、街では不穏な噂が広まっていた。\nそんなある日、あなたのもとに一通の依頼状が届いた。"}</p>
+            <p style={{fontSize:"0.75rem", color:"#c0504d", margin:"0 0 1.5rem", lineHeight:1.6, textAlign:"center"}}>選んだ選択肢によって、物語が大きく変わることはありません。普段の自分が取る行動を選んでください。</p>
+            <button style={S.btn} className="wt-btn" onClick={() => setStep("job")}>旅を始める</button>
+          </FadeIn>
+        )}
+
+        {/* JOB */}
+        {step === "job" && (
+          <FadeIn>
+            <p style={S.chapterLabel}>プロローグ</p>
+            <p style={S.question} className="wt-question">あなたはこのあたりで名の通った——</p>
+            <div style={S.grid2}>
+              {JOBS.map(j => (
+                <button key={j.id} style={S.jobBtn} className="wt-optBtn" onClick={() => handleJobSelect(j)}>
+                  {j.image
+                    ? <img src={j.image} alt={j.label} style={S.jobImg} />
+                    : <span style={S.jobEmoji}>{j.label.split(" ")[0]}</span>
+                  }
+                  <span style={S.jobName}>{j.label.split(" ").slice(1).join(" ")}</span>
+                </button>
+              ))}
+            </div>
+          </FadeIn>
+        )}
+
+        {/* POST JOB FLAVOR */}
+        {step === "job_flavor" && (
+          <FadeIn key="job_flavor">
+            <p style={S.chapterLabel}>プロローグ</p>
+            <p style={S.reactionText}>{"魔女の館を探ってほしい——あなたはその依頼を受けることにした。深い森に秘められた謎を、自らの目で確かめるために。"}</p>
+          </FadeIn>
+        )}
+
+        {/* CHAPTER INTRO */}
+        {showChapterIntro && currentChapterIntro && (
+          <FadeIn key="chapterIntro">
+            {currentChapterIntro.image && (
+              <img src={currentChapterIntro.image} alt={currentChapterIntro.chapter} style={S.chapterImg} />
+            )}
+            <p style={S.chapterLabel}>{currentChapterIntro.chapter}</p>
+            <p style={S.chapterIntroText}>{currentChapterIntro.text}</p>
+          </FadeIn>
+        )}
+
+        {/* REACTION */}
+        {!showChapterIntro && showReaction && (
+          <FadeIn key={"reaction-" + step}>
+            <div onClick={() => { if (pendingNextRef.current) { const f = pendingNextRef.current; pendingNextRef.current = null; pendingTimerRef.current && clearTimeout(pendingTimerRef.current); pendingTimerRef.current = null; setPendingNext(null); f(); } }} style={{cursor:"pointer", minHeight:"120px"}}>
+              <p style={S.reactionText}>{reaction}</p>
+            </div>
+          </FadeIn>
+        )}
+
+        {/* QUESTION */}
+        {!showChapterIntro && !showReaction && currentQ && (
+          <FadeIn key={step}>
+            <p style={S.chapterLabel}>{currentQ.chapter}</p>
+            <p style={S.question} className="wt-question">{currentQ.text}</p>
+            <div style={S.choiceCol}>
+              <button style={S.optBtn} className="wt-optBtn" onClick={() => handleAnswer("a", currentQ, getNextStep(step))}>{currentQ.a.label}</button>
+              <button style={S.optBtn} className="wt-optBtn" onClick={() => handleAnswer("b", currentQ, getNextStep(step))}>{currentQ.b.label}</button>
+            </div>
+          </FadeIn>
+        )}
+
+        {/* ITEM 1 */}
+        {!showChapterIntro && !showReaction && step === "item1" && (
+          <FadeIn key="item1">
+            <p style={S.chapterLabel}>第1章：街の噂</p>
+            <p style={S.question} className="wt-question">{"準備のために、道具屋に立ち寄った。\n館に持っていけるのは3つだけ。"}</p>
+            <div style={S.itemGrid} className="wt-itemGrid">
+              {ITEMS1.map(item => {
+                const sel = item1Selected.includes(item.id);
+                return (
+                  <button key={item.id} style={{...S.itemBtn, ...(sel ? S.itemBtnSel : {})}}
+                    onClick={() => {
+                      if (sel) setItem1Selected(item1Selected.filter(i => i !== item.id));
+                      else if (item1Selected.length < 3) setItem1Selected([...item1Selected, item.id]);
+                    }}>
+                    <span style={S.itemEmoji}>{item.label.split(" ")[0]}</span>
+                    <span style={S.itemName}>{item.label.split(" ").slice(1).join(" ")}</span>
+                    <span style={S.itemDesc} className="wt-itemDesc">{item.desc}</span>
+                  </button>
+                );
+              })}
+            </div>
+            <button style={{...S.btn, opacity: item1Selected.length === 3 ? 1 : 0.4}}
+              disabled={item1Selected.length !== 3} onClick={handleItem1Confirm}>
+              決定（{item1Selected.length}/3）
+            </button>
+          </FadeIn>
+        )}
+
+        {/* ITEM 2 */}
+        {!showChapterIntro && !showReaction && step === "item2" && (
+          <SingleItemSelect
+            chapter="第3章：魔女の館"
+            text={"館に入ると、すぐ脇に書斎があった。棚にさまざまなものが並んでいる。\nなぜか目が留まったものを、ひとつ手に取った。"}
+            items={ITEMS2}
+            onSelect={item => handleSingleItem(item, "q10", "item2")}
+          />
+        )}
+
+        {/* ITEM 3 */}
+        {!showChapterIntro && !showReaction && step === "item3" && (
+          <SingleItemSelect
+            chapter="第3章：魔女の館"
+            text="奥に進む途中、廊下の床に何かが落ちていた。拾い上げてみると——"
+            items={ITEMS3}
+            onSelect={item => handleSingleItem(item, "q11", "item3")}
+          />
+        )}
+
+        {/* ITEM 4 */}
+        {!showChapterIntro && !showReaction && step === "item4" && (
+          <SingleItemSelect
+            chapter="第3章：魔女の館"
+            text="子どもを安全な場所へ誘導しようとしたとき、部屋の隅に誰かが置いていったものが目に入った。"
+            items={ITEMS4}
+            onSelect={item => handleSingleItem(item, "q12", "item4")}
+          />
+        )}
+
+        {/* ENDING */}
+        {!showChapterIntro && !showReaction && step === "ending" && (
+          <FadeIn key="ending">
+            <p style={S.chapterLabel}>{ENDING.chapter}</p>
+            <p style={S.question} className="wt-question">{ENDING.text}</p>
+            <div style={S.choiceCol}>
+              <button style={S.optBtn} className="wt-optBtn" onClick={() => handleEndingAnswer("a")}>{ENDING.a.label}</button>
+              <button style={S.optBtn} className="wt-optBtn" onClick={() => handleEndingAnswer("b")}>{ENDING.b.label}</button>
+            </div>
+          </FadeIn>
+        )}
+
+        {/* RESULT */}
+        {step === "result" && typeData && (
+          <FadeIn key="result">
+            <p style={S.chapterLabel}>診断結果</p>
+            <h2 style={S.resultType} className="wt-resultType">{resultType}</h2>
+            <h3 style={S.resultName}>「{typeData.name}」</h3>
+            <div style={S.divider}>✦</div>
+            <p style={S.witchLabel}>あなたが出会った魔女の真実</p>
+            <p style={S.witchText}>{typeData.witch}</p>
+            <div style={S.divider}>✦</div>
+            <p style={S.witchLabel}>エピローグ</p>
+            <p style={S.witchText}>{EPILOGUES[getGroup(resultType)][endingChoice === "a" ? "stay" : "return"]}</p>
+            <div style={{display:"flex", gap:"0.8rem", marginTop:"2rem", flexWrap:"wrap", justifyContent:"center"}}>
+              <button style={S.btn} className="wt-btn" onClick={restart}>もう一度試す</button>
+              <button style={{...S.btn, fontSize:"0.75rem"}} onClick={() => setShowLogs(v => !v)}>
+                {showLogs ? "ログを隠す" : `結果ログ（${logs.length}件）`}
+              </button>
+            </div>
+            {showLogs && logs.length > 0 && (
+              <div style={S.logBox}>
+                <p style={S.witchLabel}>テストプレイ結果ログ（累計 {logs.length}件）</p>
+                <div style={{overflowY:"auto", maxHeight:"140px", marginBottom:"0.8rem"}}>
+                  {[...logs].reverse().map((l, i) => (
+                    <p key={i} style={S.logEntry}>
+                      {l.time}　<strong style={{color:"#c8a96e"}}>{l.type}</strong>
+                      <span style={{color:"#888", fontSize:"0.72rem"}}>（{TYPE_RESULTS[l.type] ? TYPE_RESULTS[l.type].name : ""}）</span>
+                      　{l.ending}
+                    </p>
+                  ))}
+                </div>
+                <p style={{...S.witchLabel, marginBottom:"0.4rem"}}>CSV（Excelに貼り付けて使用）</p>
+                <textarea
+                  readOnly
+                  value={getCSVText()}
+                  onClick={e => e.target.select()}
+                  style={{width:"100%", height:"80px", background:"rgba(0,0,0,0.4)", border:"1px solid rgba(200,169,110,0.3)", color:"#a89878", fontSize:"0.68rem", padding:"0.5rem", borderRadius:"2px", resize:"none", boxSizing:"border-box"}}
+                />
+                <button style={{...S.btn, fontSize:"0.72rem", marginTop:"0.5rem", width:"100%"}}
+                  onClick={() => { try { navigator.clipboard.writeText(getCSVText()); } catch(e) {} }}>
+                  クリップボードにコピー
+                </button>
+              </div>
+            )}
+          </FadeIn>
+        )}
+
+      </div>
+      <div style={S.stars}>{"✧ ✦ ✧ ✦ ✧ ✦ ✧ ✦ ✧"}</div>
+    </div>
+  );
+}
+
+function SingleItemSelect({ chapter, text, items, onSelect }) {
+  return (
+    <FadeIn>
+      <p style={S.chapterLabel}>{chapter}</p>
+      <p style={S.question} className="wt-question">{text}</p>
+      <div style={S.itemGrid} className="wt-itemGrid">
+        {items.map(item => (
+          <button key={item.id} style={S.itemBtn} className="wt-itemBtn" onClick={() => onSelect(item)}>
+            <span style={S.itemEmoji}>{item.label.split(" ")[0]}</span>
+            <span style={S.itemName}>{item.label.split(" ").slice(1).join(" ")}</span>
+            <span style={S.itemDesc} className="wt-itemDesc">{item.desc}</span>
+          </button>
+        ))}
+      </div>
+    </FadeIn>
+  );
+}
+
+function FadeIn({ children }) {
+  return <div style={S.fadeIn}>{children}</div>;
+}
+
+const S = {
+  bg: { minHeight:"100vh", background:"linear-gradient(160deg,#0f0c1a 0%,#1a1030 50%,#0d1a2a 100%)", display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", padding:"1.5rem", fontFamily:"'Georgia','Times New Roman',serif", color:"#e8dfc8" },
+  stars: { fontSize:"0.75rem", letterSpacing:"0.5rem", color:"#c8a96e", margin:"1rem 0", opacity:0.7 },
+  card: { background:"linear-gradient(145deg,rgba(30,20,50,0.95),rgba(15,25,40,0.98))", border:"1px solid rgba(200,169,110,0.3)", borderRadius:"4px", padding:"2.5rem 2rem", maxWidth:"560px", width:"100%", boxShadow:"0 0 60px rgba(100,60,180,0.15),inset 0 0 40px rgba(0,0,0,0.3)", minHeight:"420px", display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center" },
+  fadeIn: { animation:"fadeIn 0.6s ease", width:"100%", display:"flex", flexDirection:"column", alignItems:"center" },
+  chapterLabel: { fontSize:"0.7rem", letterSpacing:"0.25rem", color:"#c8a96e", textTransform:"uppercase", marginBottom:"0.8rem", opacity:0.8 },
+  chapterIntroText: { fontSize:"1.05rem", lineHeight:"2.1", textAlign:"center", color:"#ddd0b8", padding:"0.5rem", fontStyle:"italic" },
+  title: { fontSize:"1.8rem", color:"#e8dfc8", textAlign:"center", marginBottom:"1.2rem", fontWeight:"normal", letterSpacing:"0.1rem" },
+  body: { fontSize:"0.95rem", lineHeight:"2", textAlign:"center", color:"#c8b89a", marginBottom:"2rem", opacity:0.9, whiteSpace:"pre-line" },
+  question: { fontSize:"1rem", lineHeight:"1.9", textAlign:"center", color:"#ddd0b8", marginBottom:"1.8rem", whiteSpace:"pre-line" },
+  reactionText: { fontSize:"1.05rem", lineHeight:"2", textAlign:"center", color:"#c8a96e", fontStyle:"italic", padding:"1rem", whiteSpace:"pre-line" },
+  btn: { background:"transparent", border:"1px solid #c8a96e", color:"#c8a96e", padding:"0.7rem 2.5rem", fontSize:"0.9rem", letterSpacing:"0.15rem", cursor:"pointer", borderRadius:"2px" },
+  grid2: { display:"grid", gridTemplateColumns:"1fr 1fr", gap:"0.7rem", width:"100%", marginBottom:"1rem" },
+  choiceCol: { display:"flex", flexDirection:"column", gap:"0.8rem", width:"100%" },
+  optBtn: { background:"rgba(255,255,255,0.03)", border:"1px solid rgba(200,169,110,0.25)", color:"#ddd0b8", padding:"0.85rem 1rem", fontSize:"0.9rem", cursor:"pointer", borderRadius:"3px", textAlign:"center", lineHeight:"1.5" },
+  itemGrid: { display:"grid", gridTemplateColumns:"1fr 1fr", gap:"0.6rem", width:"100%", marginBottom:"1.2rem" },
+  itemBtn: { background:"rgba(255,255,255,0.03)", border:"1px solid rgba(200,169,110,0.2)", color:"#ddd0b8", padding:"0.7rem 0.6rem", cursor:"pointer", borderRadius:"3px", display:"flex", flexDirection:"column", alignItems:"center", gap:"0.2rem" },
+  itemBtnSel: { background:"rgba(200,169,110,0.15)", border:"1px solid rgba(200,169,110,0.7)" },
+  itemEmoji: { fontSize:"1.4rem" },
+  itemName: { fontSize:"0.8rem", color:"#c8a96e", fontWeight:"bold" },
+  itemDesc: { fontSize:"0.68rem", color:"#a89878", lineHeight:"1.4", textAlign:"center" },
+  divider: { color:"#c8a96e", margin:"1rem 0", fontSize:"1rem", opacity:0.6 },
+  resultType: { fontSize:"3rem", color:"#c8a96e", letterSpacing:"0.4rem", marginBottom:"0.3rem", fontWeight:"normal" },
+  resultName: { fontSize:"1.1rem", color:"#ddd0b8", fontWeight:"normal", marginBottom:"1rem", letterSpacing:"0.1rem" },
+  witchLabel: { fontSize:"0.72rem", letterSpacing:"0.2rem", color:"#c8a96e", marginBottom:"0.8rem", opacity:0.8 },
+  witchText: { fontSize:"0.9rem", lineHeight:"1.9", textAlign:"center", color:"#c8b89a", padding:"0 0.5rem" },
+  logBox: { marginTop:"1.5rem", width:"100%", background:"rgba(0,0,0,0.3)", border:"1px solid rgba(200,169,110,0.2)", borderRadius:"3px", padding:"1rem" },
+  logEntry: { fontSize:"0.78rem", color:"#c8b89a", lineHeight:"1.8", margin:0 },
+  titleImg: { width:"100%", maxWidth:"320px", borderRadius:"6px", marginBottom:"1.2rem", boxShadow:"0 0 30px rgba(100,60,180,0.3)" },
+  chapterImg: { width:"100%", maxWidth:"360px", borderRadius:"4px", marginBottom:"1rem", boxShadow:"0 0 20px rgba(100,60,180,0.25)", aspectRatio:"1024/1792", objectFit:"cover", maxHeight:"280px" },
+  jobBtn: { background:"rgba(255,255,255,0.03)", border:"1px solid rgba(200,169,110,0.25)", color:"#ddd0b8", padding:"0.6rem 0.4rem", cursor:"pointer", borderRadius:"3px", display:"flex", flexDirection:"column", alignItems:"center", gap:"0.4rem", overflow:"hidden" },
+  jobImg: { width:"100%", aspectRatio:"1/1", objectFit:"cover", borderRadius:"2px", display:"block" },
+  jobEmoji: { fontSize:"2rem" },
+  jobName: { fontSize:"0.85rem", color:"#c8a96e", letterSpacing:"0.05rem" },
+};
+
+
+const root = ReactDOM.createRoot(document.getElementById("root"));
+root.render(React.createElement(App));
+
+  </script>
+</body>
+</html>

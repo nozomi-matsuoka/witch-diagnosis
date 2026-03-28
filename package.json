@@ -1,0 +1,18 @@
+{
+  "name": "witch-diagnosis",
+  "version": "1.0.0",
+  "description": "不思議な森と魔女の館の物語 ──16タイプ性格診断──",
+  "main": "api/result.js",
+  "scripts": {
+    "dev": "vercel dev",
+    "build": "echo 'Static site only'"
+  },
+  "keywords": [
+    "mbti",
+    "diagnosis",
+    "personality",
+    "japanese"
+  ],
+  "author": "",
+  "license": "MIT"
+}
