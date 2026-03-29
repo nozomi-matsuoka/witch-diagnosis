@@ -619,8 +619,7 @@ function App() {
         @media (max-width: 480px) {
           .wt-card { padding: 1.5rem 1rem !important; }
           .wt-title { font-size: 1.3rem !important; margin-bottom: 0.6rem !important; }
-          .wt-titleImg--pc { display: none !important; }
-          .wt-titleImg--sp { display: block !important; }
+          .wt-titleImg { max-height: none !important; }
           .wt-chapterImg { max-height: 22vh !important; }
           .wt-question { font-size: 0.92rem !important; margin-bottom: 1.2rem !important; }
           .wt-optBtn { font-size: 0.85rem !important; padding: 1rem 0.8rem !important; }
@@ -640,13 +639,12 @@ function App() {
         {/* INTRO */}
         {step === "intro" && (
           <FadeIn>
-            <img src="/images/title_main_vertical.png" alt="不思議な森と魔女の館の物語" style={S.titleImg} className="wt-titleImg wt-titleImg--pc" />
-            <img src="/images/title_main_horizontal.png" alt="不思議な森と魔女の館の物語" style={S.titleImgMobile} className="wt-titleImg wt-titleImg--sp" />
+            <img src="/images/title_main_horizontal.png" alt="不思議な森と魔女の館の物語" style={S.titleImg} className="wt-titleImg" />
             <h1 style={S.title} className="wt-title">不思議な森と魔女の館の物語</h1>
             <p style={S.witchLabel}>——16タイプ性格診断——</p>
             <p style={S.body}>{"深い森の奥にひっそりとたたずむ魔女の館。\n近隣に住む者が次々と失踪し、街では不穏な噂が広まっていた。\nそんなある日、あなたのもとに一通の依頼状が届いた。"}</p>
             <p style={{fontSize:"0.75rem", color:"#c0504d", margin:"0 0 1rem", lineHeight:1.6, textAlign:"center"}}>選んだ選択肢によって、物語が大きく変わることはありません。普段の自分が取る行動を選んでください。</p>
-            <button style={S.btn} className="wt-btn" onClick={() => setStep("job")}>旅を始める</button>
+            <button style={S.btn} className="wt-btn" onClick={() => setStep("job")}>旅をはじめる</button>
           </FadeIn>
         )}
 
@@ -882,7 +880,6 @@ const S = {
   logBox: { marginTop:"1.5rem", width:"100%", background:"rgba(0,0,0,0.3)", border:"1px solid rgba(200,169,110,0.2)", borderRadius:"3px", padding:"1rem" },
   logEntry: { fontSize:"0.78rem", color:"#c8b89a", lineHeight:"1.8", margin:0 },
   titleImg: { width:"100%", maxWidth:"480px", objectFit:"contain", borderRadius:"6px", marginBottom:"1.2rem", boxShadow:"0 0 30px rgba(100,60,180,0.3)" },
-  titleImgMobile: { width:"100%", maxWidth:"480px", objectFit:"contain", borderRadius:"6px", marginBottom:"1.2rem", boxShadow:"0 0 30px rgba(100,60,180,0.3)", display:"none" },
   chapterImg: { width:"100%", maxWidth:"360px", borderRadius:"4px", marginBottom:"1rem", boxShadow:"0 0 20px rgba(100,60,180,0.25)", aspectRatio:"1024/1792", objectFit:"cover", maxHeight:"25vh" },
   jobBtn: { background:"rgba(255,255,255,0.03)", border:"1px solid rgba(200,169,110,0.25)", color:"#ddd0b8", padding:"0.6rem 0.4rem", cursor:"pointer", borderRadius:"3px", display:"flex", flexDirection:"column", alignItems:"center", gap:"0.4rem", overflow:"hidden" },
   jobImg: { width:"100%", aspectRatio:"1/1", objectFit:"cover", borderRadius:"2px", display:"block" },
