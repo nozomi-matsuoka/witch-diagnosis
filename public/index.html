@@ -3,24 +3,27 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>不思議な森と魔女の館の物語 ──16タイプ性格診断──</title>
-<meta property="og:title" content="不思議な森と魔女の館の物語 ──16タイプ性格診断──" />
-<meta property="og:description" content="深い森の奥にひっそりとたたずむ魔女の館。あなたの選択が物語を紡ぐ、16タイプ性格診断。" />
-<meta property="og:type" content="website" />
+<title>不思議な森と魔女の館の物語 —— 16タイプ性格診断</title>
+
+<!-- OGP -->
+<meta property="og:title" content="不思議な森と魔女の館の物語 —— 16タイプ性格診断" />
+<meta property="og:description" content="深い森の奥にひっそりとたたずむ魔女の館。あなたの選択が、魔女の真実を解き明かす。" />
 <meta property="og:image" content="/images/title_main_horizontal.png" />
+<meta property="og:type" content="website" />
 <meta name="twitter:card" content="summary_large_image" />
-<script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
-<script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
-<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+<!-- React 18 CDN -->
+<script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+<script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+<script crossorigin src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
-  html, body, #root { height: 100%; }
+  body { background: #0f0c1a; }
 </style>
-</head>
-<body>
-<div id="root"></div>
+
 <script>
-// Storage stub (localStorage-based)
+// Async storage stub (localStorage-backed)
 if (!window.storage) {
   window.storage = {
     async get(key) { const v = localStorage.getItem(key); return v ? { value: v } : null; },
@@ -39,9 +42,11 @@ if (!window.storage) {
   };
 }
 </script>
+</head>
+<body>
+<div id="root"></div>
 <script type="text/babel">
 const { useState } = React;
-
 
 // ============================================================
 // DATA
@@ -140,9 +145,9 @@ const QUESTIONS = [
   {
     id:"q0", chapter:"プロローグ",
     text:"支度を終えて街に向かう途中、同じ方向に向かう陽気な旅人を見かけた。特に重要な情報を持っている様子はないがーー",
-    a:{ label:"相手のペースに合わせ、話しながら行く", scores:{E:1},
+    a:{ label:"相手のペースに合わせて話しながら行く", scores:{E:1},
         reaction:"道を同じくする者なら、誰とでも仲間になれる。\nあなたはそう信じている。" },
-    b:{ label:"軽く会釈して、ひとりで先を急ぐ", scores:{I:1},
+    b:{ label:"軽く挨拶をして、ひとりで先を急ぐ", scores:{I:1},
         reaction:"ひとりで行く道は穏やかな静けさがある。\nあなたはそれを心地よく思った。" },
   },
   {
@@ -166,7 +171,7 @@ const QUESTIONS = [
     text:"街の人々の魔女に関する見解はふたつに割れていた。「魔女は悪だ」という者と「魔女は無害だ」という者。",
     a:{ label:"目撃情報や残された証拠を重視して判断する", scores:{S:1},
         reaction:"見えているものをまずは信じる。\n霧のなかでも、足元の石は確かにそこにある。" },
-    b:{ label:"荒唐無稽な噂話の背後に隠された真実を探る", scores:{N:1},
+    b:{ label:"食い違う噂話の背後に隠された真実を探る", scores:{N:1},
         reaction:"どちらの声にも、\n真実と幻想が混ざり合っている。\nあなたにはなぜか、そう感じられた。" },
   },
   {
@@ -190,24 +195,24 @@ const QUESTIONS = [
     text:"森のなかを進んでいくと、奇妙な光が木々の間をすり抜けていった。",
     a:{ label:"光の通り道の周囲に、足跡や痕跡がないか探す", scores:{S:1},
         reaction:"光の残した痕跡を慎重に確かめていく。\n見えないものより、見えるものを信じる。" },
-    b:{ label:"魔女に誘われているような気がして、後を追う", scores:{N:1},
+    b:{ label:"光に導かれているように感じて、追いかける", scores:{N:1},
         reaction:"光は語りかけるように揺れていた。\nあなたはただ、その導きに身を委ねた。" },
   },
   {
     id:"q7", chapter:"第2章：森への道",
-    text:"館まであとすこしというところで、通り雨が降り出した。空を見上げると、日が傾きはじめている。",
-    a:{ label:"雨宿りせず、濡れながら先を急ぐ", scores:{J:1},
-        reaction:"雨など構っていられない。\n濡れながら歩き続ける。\n目指す場所がある限り、足は止まらない。" },
-    b:{ label:"近くの木の下で雨が止むのを待つ", scores:{P:1},
-        reaction:"雨の音に耳を澄ませながら、\n木陰に身を寄せた。\n急ぐより流れに任せたほうがよいこともある。" },
+    text:"森を進んでいると、見たことのない美しい花が群生していた。\n薬草や魔法の材料として、魔女が育てているものかもしれない。",
+    a:{ label:"先を急ぐ。目的を果たしたら、また戻って来ればいい", scores:{J:1},
+        reaction:"今は立ち止まるときではない。\nやるべきことを終えてから、ここに戻ればいい。" },
+    b:{ label:"足を止めて確かめる。二度と来られないかもしれない", scores:{P:1},
+        reaction:"旅の途中で出会うものには、意味がある。\nあなたはその直感を信じて、足を止めた。" },
   },
   {
     id:"q8", chapter:"第2章：森への道",
-    text:"再び歩きはじめると、突然あたりが霧に包まれた。どこからともなく花の香りが漂ってくる。",
-    a:{ label:"香りの正体を探るより、はやく霧を抜けることを優先する", scores:{S:1},
+    text:"再び歩きはじめると、突然あたりが霧に包まれた。\nどこからともなく、かすかな歌声のようなものが聞こえてくる。",
+    a:{ label:"惑わされず、足元を確かめながら霧を抜ける", scores:{S:1},
         reaction:"惑わされず、ただ前へ。\n霧のなかでも、あなたの足取りに迷いはなかった。" },
-    b:{ label:"香りは館から来ているのかもしれない。匂いを辿って進む", scores:{N:1},
-        reaction:"花の香りが細い糸のように\n道を示していた。あなたはその導きを信じた。" },
+    b:{ label:"囁かれる言葉に意味を感じ、声の方へ向かう", scores:{N:1},
+        reaction:"霧の奥から聞こえる声は、\nなにかを伝えようとしているようだった。\nあなたはその導きを信じた。" },
   },
   {
     id:"q9", chapter:"第3章：魔女の館",
@@ -236,17 +241,17 @@ const QUESTIONS = [
   {
     id:"q12", chapter:"第4章：魔女との対峙",
     text:"そのとき魔女が現れた。あなたを見て魔女は静かに言う。「ようやく来たのね」",
-    a:{ label:"すぐに魔女に話しかける。聞きたいことは山ほどある", scores:{E:1},
+    a:{ label:"魔女に近づき話しかける。聞きたいことは山ほどある", scores:{E:1},
         reaction:"言葉が溢れ出した。\nこの出会いをあなたはずっと待っていたのかもしれない。" },
-    b:{ label:"魔女の出方をうかがう。自分を待っていたのか？", scores:{I:1},
+    b:{ label:"魔女の出方をうかがう。自分を待っていたのだろうか？", scores:{I:1},
         reaction:"冷静に出方をうかがい、それから動く。\nあなたの沈黙がこの場の空気を支配した。" },
   },
   {
     id:"q13", chapter:"第4章：魔女との対峙",
     text:"魔女はあなたに静かに問いかけた。「私がなにをしたか、本当に知っているの？」",
-    a:{ label:"考えを話す。間違いがあれば指摘してほしい", scores:{T:1},
+    a:{ label:"考えを話す。間違っていれば指摘してほしい", scores:{T:1},
         reaction:"仮説を並べて、検証する。\nそうやって、あなたは真実に近づいてきた。" },
-    b:{ label:"魔女の言葉を聞く。正直に話してほしい", scores:{F:1},
+    b:{ label:"あなた自身の言葉で、話してほしいと伝える", scores:{F:1},
         reaction:"答えを押し付けるより、まずは話を。\nあなたの言葉が真実への扉を開く。" },
   },
   {
@@ -613,7 +618,9 @@ function App() {
         @keyframes fadeIn { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
         @media (max-width: 480px) {
           .wt-card { padding: 1.5rem 1rem !important; }
-          .wt-title { font-size: 1.3rem !important; }
+          .wt-title { font-size: 1.3rem !important; margin-bottom: 0.6rem !important; }
+          .wt-titleImg { max-height: 25vh !important; }
+          .wt-chapterImg { max-height: 22vh !important; }
           .wt-question { font-size: 0.92rem !important; margin-bottom: 1.2rem !important; }
           .wt-optBtn { font-size: 0.85rem !important; padding: 1rem 0.8rem !important; }
           .wt-itemGrid { gap: 0.4rem !important; }
@@ -632,11 +639,11 @@ function App() {
         {/* INTRO */}
         {step === "intro" && (
           <FadeIn>
-            <img src="/images/title_main_vertical.png" alt="不思議な森と魔女の館の物語" style={S.titleImg} />
+            <img src="/images/title_main_vertical.png" alt="不思議な森と魔女の館の物語" style={S.titleImg} className="wt-titleImg" />
             <h1 style={S.title} className="wt-title">不思議な森と魔女の館の物語</h1>
             <p style={S.witchLabel}>——16タイプ性格診断——</p>
             <p style={S.body}>{"深い森の奥にひっそりとたたずむ魔女の館。\n近隣に住む者が次々と失踪し、街では不穏な噂が広まっていた。\nそんなある日、あなたのもとに一通の依頼状が届いた。"}</p>
-            <p style={{fontSize:"0.75rem", color:"#c0504d", margin:"0 0 1.5rem", lineHeight:1.6, textAlign:"center"}}>選んだ選択肢によって、物語が大きく変わることはありません。普段の自分が取る行動を選んでください。</p>
+            <p style={{fontSize:"0.75rem", color:"#c0504d", margin:"0 0 1rem", lineHeight:1.6, textAlign:"center"}}>選んだ選択肢によって、物語が大きく変わることはありません。普段の自分が取る行動を選んでください。</p>
             <button style={S.btn} className="wt-btn" onClick={() => setStep("job")}>旅を始める</button>
           </FadeIn>
         )}
@@ -672,7 +679,7 @@ function App() {
         {showChapterIntro && currentChapterIntro && (
           <FadeIn key="chapterIntro">
             {currentChapterIntro.image && (
-              <img src={currentChapterIntro.image} alt={currentChapterIntro.chapter} style={S.chapterImg} />
+              <img src={currentChapterIntro.image} alt={currentChapterIntro.chapter} style={S.chapterImg} className="wt-chapterImg" />
             )}
             <p style={S.chapterLabel}>{currentChapterIntro.chapter}</p>
             <p style={S.chapterIntroText}>{currentChapterIntro.text}</p>
@@ -852,7 +859,7 @@ const S = {
   chapterLabel: { fontSize:"0.7rem", letterSpacing:"0.25rem", color:"#c8a96e", textTransform:"uppercase", marginBottom:"0.8rem", opacity:0.8 },
   chapterIntroText: { fontSize:"1.05rem", lineHeight:"2.1", textAlign:"center", color:"#ddd0b8", padding:"0.5rem", fontStyle:"italic" },
   title: { fontSize:"1.8rem", color:"#e8dfc8", textAlign:"center", marginBottom:"1.2rem", fontWeight:"normal", letterSpacing:"0.1rem" },
-  body: { fontSize:"0.95rem", lineHeight:"2", textAlign:"center", color:"#c8b89a", marginBottom:"2rem", opacity:0.9, whiteSpace:"pre-line" },
+  body: { fontSize:"0.95rem", lineHeight:"2", textAlign:"center", color:"#c8b89a", marginBottom:"1.2rem", opacity:0.9, whiteSpace:"pre-line" },
   question: { fontSize:"1rem", lineHeight:"1.9", textAlign:"center", color:"#ddd0b8", marginBottom:"1.8rem", whiteSpace:"pre-line" },
   reactionText: { fontSize:"1.05rem", lineHeight:"2", textAlign:"center", color:"#c8a96e", fontStyle:"italic", padding:"1rem", whiteSpace:"pre-line" },
   btn: { background:"transparent", border:"1px solid #c8a96e", color:"#c8a96e", padding:"0.7rem 2.5rem", fontSize:"0.9rem", letterSpacing:"0.15rem", cursor:"pointer", borderRadius:"2px" },
@@ -872,8 +879,8 @@ const S = {
   witchText: { fontSize:"0.9rem", lineHeight:"1.9", textAlign:"center", color:"#c8b89a", padding:"0 0.5rem" },
   logBox: { marginTop:"1.5rem", width:"100%", background:"rgba(0,0,0,0.3)", border:"1px solid rgba(200,169,110,0.2)", borderRadius:"3px", padding:"1rem" },
   logEntry: { fontSize:"0.78rem", color:"#c8b89a", lineHeight:"1.8", margin:0 },
-  titleImg: { width:"100%", maxWidth:"320px", borderRadius:"6px", marginBottom:"1.2rem", boxShadow:"0 0 30px rgba(100,60,180,0.3)" },
-  chapterImg: { width:"100%", maxWidth:"360px", borderRadius:"4px", marginBottom:"1rem", boxShadow:"0 0 20px rgba(100,60,180,0.25)", aspectRatio:"1024/1792", objectFit:"cover", maxHeight:"280px" },
+  titleImg: { width:"100%", maxWidth:"320px", maxHeight:"30vh", objectFit:"contain", borderRadius:"6px", marginBottom:"1.2rem", boxShadow:"0 0 30px rgba(100,60,180,0.3)" },
+  chapterImg: { width:"100%", maxWidth:"360px", borderRadius:"4px", marginBottom:"1rem", boxShadow:"0 0 20px rgba(100,60,180,0.25)", aspectRatio:"1024/1792", objectFit:"cover", maxHeight:"25vh" },
   jobBtn: { background:"rgba(255,255,255,0.03)", border:"1px solid rgba(200,169,110,0.25)", color:"#ddd0b8", padding:"0.6rem 0.4rem", cursor:"pointer", borderRadius:"3px", display:"flex", flexDirection:"column", alignItems:"center", gap:"0.4rem", overflow:"hidden" },
   jobImg: { width:"100%", aspectRatio:"1/1", objectFit:"cover", borderRadius:"2px", display:"block" },
   jobEmoji: { fontSize:"2rem" },
@@ -881,7 +888,8 @@ const S = {
 };
 
 
-ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+const root = ReactDOM.createRoot(document.getElementById("root"));
+root.render(<App />);
 </script>
 </body>
 </html>
