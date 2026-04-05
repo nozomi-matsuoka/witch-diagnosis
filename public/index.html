@@ -17,9 +17,70 @@
 <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
 <script crossorigin src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@300;400;500&family=Noto+Sans+JP:wght@400&display=swap" rel="stylesheet">
+
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
-  body { background: #0f0c1a; }
+  body { background: #0f0c29; }
+
+  /* ===== フェーズテーマ CSS変数 ===== */
+  :root {
+    --bg-gradient: linear-gradient(160deg, #0f0c29 0%, #302b63 100%);
+    --text-main: #e0d8f0;
+    --btn-bg: rgba(74, 63, 138, 0.3);
+    --btn-border: rgba(185, 166, 255, 0.3);
+    --btn-text: #e0d8f0;
+    --card-bg: rgba(15, 10, 40, 0.55);
+    --card-border: rgba(180, 160, 255, 0.2);
+  }
+  .theme-phase-1 {
+    --bg-gradient: linear-gradient(160deg, #0f0c29 0%, #302b63 100%);
+    --text-main: #e0d8f0;
+    --btn-bg: rgba(74, 63, 138, 0.3);
+    --btn-border: rgba(185, 166, 255, 0.3);
+    --btn-text: #e0d8f0;
+    --card-bg: rgba(15, 10, 40, 0.55);
+    --card-border: rgba(180, 160, 255, 0.2);
+  }
+  .theme-phase-2 {
+    --bg-gradient: linear-gradient(160deg, #242054 0%, #4a3f8a 100%);
+    --text-main: #ebe5f5;
+    --btn-bg: rgba(107, 92, 165, 0.35);
+    --btn-border: rgba(185, 166, 255, 0.4);
+    --btn-text: #ebe5f5;
+    --card-bg: rgba(15, 10, 40, 0.55);
+    --card-border: rgba(180, 160, 255, 0.2);
+  }
+  .theme-phase-3 {
+    --bg-gradient: linear-gradient(160deg, #3a3276 0%, #6b5ca5 100%);
+    --text-main: #f2eefa;
+    --btn-bg: rgba(140, 123, 191, 0.4);
+    --btn-border: rgba(200, 185, 255, 0.5);
+    --btn-text: #f2eefa;
+    --card-bg: rgba(15, 10, 40, 0.55);
+    --card-border: rgba(180, 160, 255, 0.2);
+  }
+  .theme-phase-4 {
+    --bg-gradient: linear-gradient(160deg, #544894 0%, #8c7bbf 100%);
+    --text-main: #f9f7fc;
+    --btn-bg: rgba(176, 161, 214, 0.45);
+    --btn-border: rgba(220, 210, 255, 0.6);
+    --btn-text: #f9f7fc;
+    --card-bg: rgba(15, 10, 40, 0.55);
+    --card-border: rgba(180, 160, 255, 0.2);
+  }
+  .theme-phase-5 {
+    --bg-gradient: linear-gradient(160deg, #f6f2ff 0%, #fce8f4 100%);
+    --text-main: #3a2d6f;
+    --btn-bg: linear-gradient(135deg, #3a2d6f 0%, #5b2a4f 100%);
+    --btn-border: rgba(233, 193, 106, 0.4);
+    --btn-text: #e9c16a;
+    --card-bg: rgba(255, 255, 255, 0.75);
+    --card-border: rgba(180, 160, 255, 0.35);
+  }
+  .wt-root { transition: background 1.5s ease-in-out; }
 </style>
 
 <script>
@@ -359,6 +420,15 @@ function calcType(scores, lateJP, lateEI) {
 // 結果送信先API URL
 const RESULT_API_URL = '/api/result';
 
+// フェーズ判定（step → 1〜5）
+function getPhase(step) {
+  if (step === "result") return 5;
+  if (["q7","q8","q9","item2","q10","item3","q11","item4","q12","q13","q14","q15","ending"].includes(step)) return 4;
+  if (["item1","q4","q5","q6"].includes(step)) return 3;
+  if (["q1","q2","q3"].includes(step)) return 2;
+  return 1;
+}
+
 // ============================================================
 function App() {
   const [step, setStep] = useState("intro");
@@ -613,7 +683,7 @@ function App() {
   const typeData = resultType ? TYPE_RESULTS[resultType] : null;
 
   return (
-    <div style={S.bg}>
+    <div style={S.bg} className={`wt-root theme-phase-${getPhase(step)}`}>
       <style>{`
         @keyframes fadeIn { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
         @media (max-width: 480px) {
@@ -852,36 +922,36 @@ function FadeIn({ children }) {
 }
 
 const S = {
-  bg: { minHeight:"100vh", background:"linear-gradient(160deg,#0f0c1a 0%,#1a1030 50%,#0d1a2a 100%)", display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", padding:"1.5rem", fontFamily:"'Georgia','Times New Roman',serif", color:"#e8dfc8" },
+  bg: { minHeight:"100vh", background:"var(--bg-gradient)", display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", padding:"1.5rem", fontFamily:"'Noto Serif JP','Georgia',serif", color:"var(--text-main)" },
   stars: { fontSize:"0.75rem", letterSpacing:"0.5rem", color:"#c8a96e", margin:"1rem 0", opacity:0.7 },
   card: { background:"linear-gradient(145deg,rgba(30,20,50,0.95),rgba(15,25,40,0.98))", border:"1px solid rgba(200,169,110,0.3)", borderRadius:"4px", padding:"2.5rem 2rem", maxWidth:"560px", width:"100%", boxShadow:"0 0 60px rgba(100,60,180,0.15),inset 0 0 40px rgba(0,0,0,0.3)", minHeight:"420px", display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center" },
   fadeIn: { animation:"fadeIn 0.6s ease", width:"100%", display:"flex", flexDirection:"column", alignItems:"center" },
-  chapterLabel: { fontSize:"0.7rem", letterSpacing:"0.25rem", color:"#c8a96e", textTransform:"uppercase", marginBottom:"0.8rem", opacity:0.8 },
-  chapterIntroText: { fontSize:"1.05rem", lineHeight:"2.1", textAlign:"center", color:"#ddd0b8", padding:"0.5rem", fontStyle:"italic" },
-  title: { fontSize:"1.8rem", color:"#e8dfc8", textAlign:"center", marginBottom:"1.2rem", fontWeight:"normal", letterSpacing:"0.1rem" },
-  body: { fontSize:"0.95rem", lineHeight:"2", textAlign:"center", color:"#c8b89a", marginBottom:"1.2rem", opacity:0.9, whiteSpace:"pre-line" },
-  question: { fontSize:"1rem", lineHeight:"1.9", textAlign:"center", color:"#ddd0b8", marginBottom:"1.8rem", whiteSpace:"pre-line" },
-  reactionText: { fontSize:"1.05rem", lineHeight:"2", textAlign:"center", color:"#c8a96e", fontStyle:"italic", padding:"1rem", whiteSpace:"pre-line" },
-  btn: { background:"transparent", border:"1px solid #c8a96e", color:"#c8a96e", padding:"0.7rem 2.5rem", fontSize:"0.9rem", letterSpacing:"0.15rem", cursor:"pointer", borderRadius:"2px" },
+  chapterLabel: { fontSize:"0.69rem", letterSpacing:"0.25rem", color:"#c8a96e", textTransform:"uppercase", marginBottom:"0.8rem", opacity:0.8, fontFamily:"'Noto Sans JP',sans-serif" },
+  chapterIntroText: { fontSize:"1.05rem", lineHeight:"2.0", textAlign:"center", color:"var(--text-main)", padding:"0.5rem", fontStyle:"italic", letterSpacing:"0.04em" },
+  title: { fontSize:"1.75rem", color:"var(--text-main)", textAlign:"center", marginBottom:"1.2rem", fontWeight:"300", letterSpacing:"0.08em", lineHeight:"2.0" },
+  body: { fontSize:"0.94rem", lineHeight:"2.0", textAlign:"center", color:"var(--text-main)", marginBottom:"1.2rem", opacity:0.9, whiteSpace:"pre-line", letterSpacing:"0.04em" },
+  question: { fontSize:"0.94rem", lineHeight:"2.0", textAlign:"center", color:"var(--text-main)", marginBottom:"1.8rem", whiteSpace:"pre-line", letterSpacing:"0.04em" },
+  reactionText: { fontSize:"1.05rem", lineHeight:"2.0", textAlign:"center", color:"#c8a96e", fontStyle:"italic", padding:"1rem", whiteSpace:"pre-line", letterSpacing:"0.06em" },
+  btn: { background:"transparent", border:"1px solid var(--btn-border, #c8a96e)", color:"var(--btn-text, #c8a96e)", padding:"0.7rem 2.5rem", fontSize:"0.875rem", letterSpacing:"0.12em", cursor:"pointer", borderRadius:"2px", fontFamily:"'Noto Serif JP','Georgia',serif" },
   grid2: { display:"grid", gridTemplateColumns:"1fr 1fr", gap:"0.7rem", width:"100%", marginBottom:"1rem" },
   choiceCol: { display:"flex", flexDirection:"column", gap:"0.8rem", width:"100%" },
-  optBtn: { background:"rgba(255,255,255,0.03)", border:"1px solid rgba(200,169,110,0.25)", color:"#ddd0b8", padding:"0.85rem 1rem", fontSize:"0.9rem", cursor:"pointer", borderRadius:"3px", textAlign:"center", lineHeight:"1.5" },
+  optBtn: { background:"var(--btn-bg)", border:"1px solid var(--btn-border)", color:"var(--text-main)", padding:"0.85rem 1rem", fontSize:"0.875rem", cursor:"pointer", borderRadius:"3px", textAlign:"center", lineHeight:"1.5", letterSpacing:"0.06em", fontFamily:"'Noto Serif JP','Georgia',serif" },
   itemGrid: { display:"grid", gridTemplateColumns:"1fr 1fr", gap:"0.6rem", width:"100%", marginBottom:"1.2rem" },
-  itemBtn: { background:"rgba(255,255,255,0.03)", border:"1px solid rgba(200,169,110,0.2)", color:"#ddd0b8", padding:"0.7rem 0.6rem", cursor:"pointer", borderRadius:"3px", display:"flex", flexDirection:"column", alignItems:"center", gap:"0.2rem" },
+  itemBtn: { background:"rgba(255,255,255,0.03)", border:"1px solid rgba(200,169,110,0.2)", color:"var(--text-main)", padding:"0.7rem 0.6rem", cursor:"pointer", borderRadius:"3px", display:"flex", flexDirection:"column", alignItems:"center", gap:"0.2rem" },
   itemBtnSel: { background:"rgba(200,169,110,0.15)", border:"1px solid rgba(200,169,110,0.7)" },
   itemEmoji: { fontSize:"1.4rem" },
   itemName: { fontSize:"0.8rem", color:"#c8a96e", fontWeight:"bold" },
   itemDesc: { fontSize:"0.68rem", color:"#a89878", lineHeight:"1.4", textAlign:"center" },
   divider: { color:"#c8a96e", margin:"1rem 0", fontSize:"1rem", opacity:0.6 },
-  resultType: { fontSize:"3rem", color:"#c8a96e", letterSpacing:"0.4rem", marginBottom:"0.3rem", fontWeight:"normal" },
-  resultName: { fontSize:"1.1rem", color:"#ddd0b8", fontWeight:"normal", marginBottom:"1rem", letterSpacing:"0.1rem" },
-  witchLabel: { fontSize:"0.72rem", letterSpacing:"0.2rem", color:"#c8a96e", marginBottom:"0.8rem", opacity:0.8 },
-  witchText: { fontSize:"0.9rem", lineHeight:"1.9", textAlign:"center", color:"#c8b89a", padding:"0 0.5rem" },
+  resultType: { fontSize:"3rem", color:"var(--btn-text, #c8a96e)", letterSpacing:"0.4rem", marginBottom:"0.3rem", fontWeight:"300" },
+  resultName: { fontSize:"1.1rem", color:"var(--text-main)", fontWeight:"400", marginBottom:"1rem", letterSpacing:"0.12em" },
+  witchLabel: { fontSize:"0.69rem", letterSpacing:"0.2rem", color:"#c8a96e", marginBottom:"0.8rem", opacity:0.8, fontFamily:"'Noto Sans JP',sans-serif" },
+  witchText: { fontSize:"0.94rem", lineHeight:"2.0", textAlign:"center", color:"var(--text-main)", padding:"0 0.5rem", letterSpacing:"0.04em" },
   logBox: { marginTop:"1.5rem", width:"100%", background:"rgba(0,0,0,0.3)", border:"1px solid rgba(200,169,110,0.2)", borderRadius:"3px", padding:"1rem" },
   logEntry: { fontSize:"0.78rem", color:"#c8b89a", lineHeight:"1.8", margin:0 },
   titleImg: { width:"100%", maxWidth:"480px", objectFit:"contain", borderRadius:"6px", marginBottom:"1.2rem", boxShadow:"0 0 30px rgba(100,60,180,0.3)" },
   chapterImg: { width:"100%", maxWidth:"360px", borderRadius:"4px", marginBottom:"1rem", boxShadow:"0 0 20px rgba(100,60,180,0.25)", aspectRatio:"1024/1792", objectFit:"cover", maxHeight:"25vh" },
-  jobBtn: { background:"rgba(255,255,255,0.03)", border:"1px solid rgba(200,169,110,0.25)", color:"#ddd0b8", padding:"0.6rem 0.4rem", cursor:"pointer", borderRadius:"3px", display:"flex", flexDirection:"column", alignItems:"center", gap:"0.4rem", overflow:"hidden" },
+  jobBtn: { background:"rgba(255,255,255,0.03)", border:"1px solid rgba(200,169,110,0.25)", color:"var(--text-main)", padding:"0.6rem 0.4rem", cursor:"pointer", borderRadius:"3px", display:"flex", flexDirection:"column", alignItems:"center", gap:"0.4rem", overflow:"hidden" },
   jobImg: { width:"100%", aspectRatio:"1/1", objectFit:"cover", borderRadius:"2px", display:"block" },
   jobEmoji: { fontSize:"2rem" },
   jobName: { fontSize:"0.85rem", color:"#c8a96e", letterSpacing:"0.05rem" },
