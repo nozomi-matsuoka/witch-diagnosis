@@ -83,6 +83,14 @@
   .wt-root { transition: background 1.5s ease-in-out; }
 </style>
 
+<!-- ===== Google AdSense =====
+  【青さんへ】AdSense審査通過後に以下のコメントを外してください。
+  ca-pub-XXXXXXXXXX の部分をご自身のパブリッシャーIDに差し替えてください。
+
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-XXXXXXXXXX"
+     crossorigin="anonymous"></script>
+===== /Google AdSense ===== -->
+
 <script>
 // Async storage stub (localStorage-backed)
 if (!window.storage) {
@@ -686,6 +694,35 @@ function App() {
     <div style={S.bg} className={`wt-root theme-phase-${getPhase(step)}`}>
       <style>{`
         @keyframes fadeIn { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
+        /* ===== ホバーエフェクト ===== */
+        .wt-optBtn:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 6px 20px rgba(0,0,0,0.35);
+        }
+        .wt-btn:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+        }
+        /* ===== Phase 5 ボタン上書き ===== */
+        .theme-phase-5 .wt-optBtn {
+          border-radius: 40px !important;
+          background: linear-gradient(135deg, #3a2d6f 0%, #5b2a4f 100%) !important;
+          color: #e9c16a !important;
+          border-color: rgba(233,193,106,0.4) !important;
+        }
+        .theme-phase-5 .wt-optBtn:hover {
+          box-shadow: 0 6px 24px rgba(58,45,111,0.5);
+        }
+        .theme-phase-5 .wt-btn {
+          border-radius: 40px !important;
+        }
+        /* ===== Phase 5 カード上書き ===== */
+        .theme-phase-5 .wt-card {
+          border-radius: 24px !important;
+          backdrop-filter: blur(20px) !important;
+          -webkit-backdrop-filter: blur(20px) !important;
+          box-shadow: 0 12px 48px rgba(140,120,200,0.25) !important;
+        }
         @media (max-width: 480px) {
           .wt-card { padding: 1.5rem 1rem !important; }
           .wt-title { font-size: 1.3rem !important; margin-bottom: 0.6rem !important; }
@@ -895,6 +932,9 @@ function App() {
 
       </div>
       <div style={S.stars}>{"✧ ✦ ✧ ✦ ✧ ✦ ✧ ✦ ✧"}</div>
+      <div style={{fontSize:"0.69rem", color:"rgba(200,169,110,0.5)", letterSpacing:"0.1em", marginBottom:"1.5rem", fontFamily:"'Noto Sans JP',sans-serif"}}>
+        <a href="/privacy.html" style={{color:"rgba(200,169,110,0.5)", textDecoration:"none"}}>プライバシーポリシー・利用規約</a>
+      </div>
     </div>
   );
 }
@@ -924,7 +964,7 @@ function FadeIn({ children }) {
 const S = {
   bg: { minHeight:"100vh", background:"var(--bg-gradient)", display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", padding:"1.5rem", fontFamily:"'Noto Serif JP','Georgia',serif", color:"var(--text-main)" },
   stars: { fontSize:"0.75rem", letterSpacing:"0.5rem", color:"#c8a96e", margin:"1rem 0", opacity:0.7 },
-  card: { background:"linear-gradient(145deg,rgba(30,20,50,0.95),rgba(15,25,40,0.98))", border:"1px solid rgba(200,169,110,0.3)", borderRadius:"4px", padding:"2.5rem 2rem", maxWidth:"560px", width:"100%", boxShadow:"0 0 60px rgba(100,60,180,0.15),inset 0 0 40px rgba(0,0,0,0.3)", minHeight:"420px", display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center" },
+  card: { background:"var(--card-bg)", backdropFilter:"blur(16px)", WebkitBackdropFilter:"blur(16px)", border:"1px solid var(--card-border)", borderRadius:"20px", padding:"2.5rem 2rem", maxWidth:"560px", width:"100%", boxShadow:"0 8px 32px rgba(0,0,0,0.4)", minHeight:"420px", display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center" },
   fadeIn: { animation:"fadeIn 0.6s ease", width:"100%", display:"flex", flexDirection:"column", alignItems:"center" },
   chapterLabel: { fontSize:"0.69rem", letterSpacing:"0.25rem", color:"#c8a96e", textTransform:"uppercase", marginBottom:"0.8rem", opacity:0.8, fontFamily:"'Noto Sans JP',sans-serif" },
   chapterIntroText: { fontSize:"1.05rem", lineHeight:"2.0", textAlign:"center", color:"var(--text-main)", padding:"0.5rem", fontStyle:"italic", letterSpacing:"0.04em" },
@@ -932,10 +972,10 @@ const S = {
   body: { fontSize:"0.94rem", lineHeight:"2.0", textAlign:"center", color:"var(--text-main)", marginBottom:"1.2rem", opacity:0.9, whiteSpace:"pre-line", letterSpacing:"0.04em" },
   question: { fontSize:"0.94rem", lineHeight:"2.0", textAlign:"center", color:"var(--text-main)", marginBottom:"1.8rem", whiteSpace:"pre-line", letterSpacing:"0.04em" },
   reactionText: { fontSize:"1.05rem", lineHeight:"2.0", textAlign:"center", color:"#c8a96e", fontStyle:"italic", padding:"1rem", whiteSpace:"pre-line", letterSpacing:"0.06em" },
-  btn: { background:"transparent", border:"1px solid var(--btn-border, #c8a96e)", color:"var(--btn-text, #c8a96e)", padding:"0.7rem 2.5rem", fontSize:"0.875rem", letterSpacing:"0.12em", cursor:"pointer", borderRadius:"2px", fontFamily:"'Noto Serif JP','Georgia',serif" },
+  btn: { background:"transparent", border:"1px solid var(--btn-border, #c8a96e)", color:"var(--btn-text, #c8a96e)", padding:"0.7rem 2.5rem", fontSize:"0.875rem", letterSpacing:"0.12em", cursor:"pointer", borderRadius:"12px", fontFamily:"'Noto Serif JP','Georgia',serif", transition:"transform 0.2s ease, box-shadow 0.2s ease" },
   grid2: { display:"grid", gridTemplateColumns:"1fr 1fr", gap:"0.7rem", width:"100%", marginBottom:"1rem" },
   choiceCol: { display:"flex", flexDirection:"column", gap:"0.8rem", width:"100%" },
-  optBtn: { background:"var(--btn-bg)", border:"1px solid var(--btn-border)", color:"var(--text-main)", padding:"0.85rem 1rem", fontSize:"0.875rem", cursor:"pointer", borderRadius:"3px", textAlign:"center", lineHeight:"1.5", letterSpacing:"0.06em", fontFamily:"'Noto Serif JP','Georgia',serif" },
+  optBtn: { background:"var(--btn-bg)", border:"1px solid var(--btn-border)", color:"var(--text-main)", padding:"0.85rem 1rem", fontSize:"0.875rem", cursor:"pointer", borderRadius:"12px", textAlign:"center", lineHeight:"1.5", letterSpacing:"0.06em", fontFamily:"'Noto Serif JP','Georgia',serif", transition:"transform 0.2s ease, box-shadow 0.2s ease" },
   itemGrid: { display:"grid", gridTemplateColumns:"1fr 1fr", gap:"0.6rem", width:"100%", marginBottom:"1.2rem" },
   itemBtn: { background:"rgba(255,255,255,0.03)", border:"1px solid rgba(200,169,110,0.2)", color:"var(--text-main)", padding:"0.7rem 0.6rem", cursor:"pointer", borderRadius:"3px", display:"flex", flexDirection:"column", alignItems:"center", gap:"0.2rem" },
   itemBtnSel: { background:"rgba(200,169,110,0.15)", border:"1px solid rgba(200,169,110,0.7)" },
