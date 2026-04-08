@@ -26,8 +26,12 @@
   body { background: #0f0c29; }
 
   /* ===== フェーズテーマ CSS変数 ===== */
+  /* @property でグラデーション色をアニメーション可能にする（CSS Houdini） */
+  @property --col-top { syntax: '<color>'; inherits: false; initial-value: #0f0c29; }
+  @property --col-bot { syntax: '<color>'; inherits: false; initial-value: #302b63; }
   :root {
-    --bg-gradient: linear-gradient(160deg, #0f0c29 0%, #302b63 100%);
+    --col-top: #0f0c29;
+    --col-bot: #302b63;
     --text-main: #e0d8f0;
     --btn-bg: rgba(74, 63, 138, 0.3);
     --btn-border: rgba(185, 166, 255, 0.3);
@@ -36,7 +40,7 @@
     --card-border: rgba(180, 160, 255, 0.2);
   }
   .theme-phase-1 {
-    --bg-gradient: linear-gradient(160deg, #0f0c29 0%, #302b63 100%);
+    --col-top: #0f0c29; --col-bot: #302b63;
     --text-main: #e0d8f0;
     --btn-bg: rgba(74, 63, 138, 0.3);
     --btn-border: rgba(185, 166, 255, 0.3);
@@ -45,7 +49,7 @@
     --card-border: rgba(180, 160, 255, 0.2);
   }
   .theme-phase-2 {
-    --bg-gradient: linear-gradient(160deg, #242054 0%, #4a3f8a 100%);
+    --col-top: #242054; --col-bot: #4a3f8a;
     --text-main: #ebe5f5;
     --btn-bg: rgba(107, 92, 165, 0.35);
     --btn-border: rgba(185, 166, 255, 0.4);
@@ -54,7 +58,7 @@
     --card-border: rgba(180, 160, 255, 0.2);
   }
   .theme-phase-3 {
-    --bg-gradient: linear-gradient(160deg, #3a3276 0%, #6b5ca5 100%);
+    --col-top: #3a3276; --col-bot: #6b5ca5;
     --text-main: #f2eefa;
     --btn-bg: rgba(140, 123, 191, 0.4);
     --btn-border: rgba(200, 185, 255, 0.5);
@@ -63,7 +67,7 @@
     --card-border: rgba(180, 160, 255, 0.2);
   }
   .theme-phase-4 {
-    --bg-gradient: linear-gradient(160deg, #544894 0%, #8c7bbf 100%);
+    --col-top: #544894; --col-bot: #8c7bbf;
     --text-main: #f9f7fc;
     --btn-bg: rgba(176, 161, 214, 0.45);
     --btn-border: rgba(220, 210, 255, 0.6);
@@ -72,7 +76,7 @@
     --card-border: rgba(180, 160, 255, 0.2);
   }
   .theme-phase-5 {
-    --bg-gradient: linear-gradient(160deg, #f6f2ff 0%, #fce8f4 100%);
+    --col-top: #f6f2ff; --col-bot: #fce8f4;
     --text-main: #3a2d6f;
     --btn-bg: linear-gradient(135deg, #3a2d6f 0%, #5b2a4f 100%);
     --btn-border: rgba(233, 193, 106, 0.4);
@@ -80,7 +84,16 @@
     --card-bg: rgba(255, 255, 255, 0.75);
     --card-border: rgba(180, 160, 255, 0.35);
   }
-  .wt-root { transition: background 1.5s ease-in-out; }
+  /* フェーズ切替時にグラデーションを1.5秒かけてなめらかに遷移 */
+  .wt-root {
+    background: linear-gradient(160deg, var(--col-top) 0%, var(--col-bot) 100%);
+    transition: --col-top 1.5s ease-in-out, --col-bot 1.5s ease-in-out;
+  }
+  /* 星プログレスインジケーター：現在の星のpulseアニメーション */
+  @keyframes starPulse {
+    0%, 100% { transform: scale(1.2); }
+    50% { transform: scale(1.6); }
+  }
 </style>
 
 <!-- ===== Google AdSense =====
@@ -349,6 +362,12 @@ const ENDING = {
   b:{ label:"街へ戻って、自分の役割を果たす", scores:{S:1,J:1},
       reaction:"来た道を振り返り、あなたは歩き出した。\n使命を果たすことが、あなたの答えだった。" },
 };
+
+// 星座型プログレスインジケーター用のステップ順（質問+エンディング = 18ステップ）
+const PROGRESS_STEPS = [
+  'prologue_q','q0','q1','q2','q3','q4','q5','q6',
+  'q7','q8','q9','q10','q11','q12','q13','q14','q15','ending'
+];
 
 // ============================================================
 // EPILOGUE
@@ -742,6 +761,16 @@ function App() {
       `}</style>
       <div style={S.stars}>{"✦ ✧ ✦ ✧ ✦ ✧ ✦ ✧ ✦"}</div>
       <div style={S.card} className="wt-card">
+        {/* 星座型プログレスインジケーター（質問中のみ表示） */}
+        {(() => {
+          const progIdx = PROGRESS_STEPS.indexOf(step);
+          if (progIdx < 0) return null;
+          return (
+            <div style={{position:'absolute', top:'0.75rem', left:'1rem', right:'1rem'}}>
+              <ProgressIndicator currentIndex={progIdx} phase={getPhase(step)} />
+            </div>
+          );
+        })()}
 
         {/* INTRO */}
         {step === "intro" && (
@@ -961,10 +990,57 @@ function FadeIn({ children }) {
   return <div style={S.fadeIn}>{children}</div>;
 }
 
+// 星座型プログレスインジケーター
+function ProgressIndicator({ currentIndex, phase }) {
+  const total = PROGRESS_STEPS.length;
+  // フェーズに応じた星の色
+  const starColor = phase === 5 ? '#e9c16a'
+    : phase === 4 ? '#e0d8f0'
+    : phase === 3 ? '#c8b9ff'
+    : '#b9a6ff';
+  const glowColor = phase === 5 ? 'rgba(233,193,106,0.7)' : 'rgba(185,166,255,0.7)';
+
+  return (
+    <div style={{
+      display:'flex', alignItems:'center', justifyContent:'center',
+      width:'100%', padding:'0 0.5rem', gap:0,
+    }}>
+      {PROGRESS_STEPS.map((s, i) => {
+        const isAnswered = i < currentIndex;
+        const isCurrent = i === currentIndex;
+        const dotSize = isCurrent ? 9 : 6;
+        return (
+          <React.Fragment key={s}>
+            {i > 0 && (
+              <div style={{
+                flex: 1, height: '1px',
+                background: isAnswered ? starColor : 'rgba(255,255,255,0.15)',
+                opacity: isAnswered ? 0.7 : 1,
+                transition: 'background 0.8s ease',
+                minWidth: '2px',
+              }} />
+            )}
+            <div style={{
+              width: dotSize + 'px', height: dotSize + 'px',
+              borderRadius: '50%',
+              background: (isAnswered || isCurrent) ? starColor : 'rgba(255,255,255,0.15)',
+              opacity: isCurrent ? 1 : isAnswered ? 0.9 : 0.3,
+              boxShadow: (isAnswered || isCurrent) ? `0 0 5px ${glowColor}, 0 0 10px ${glowColor}` : 'none',
+              animation: isCurrent ? 'starPulse 1.8s ease-in-out infinite' : 'none',
+              transition: 'background 0.8s ease, box-shadow 0.8s ease',
+              flexShrink: 0,
+            }} />
+          </React.Fragment>
+        );
+      })}
+    </div>
+  );
+}
+
 const S = {
-  bg: { minHeight:"100vh", background:"var(--bg-gradient)", display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", padding:"1.5rem", fontFamily:"'Noto Serif JP','Georgia',serif", color:"var(--text-main)" },
+  bg: { minHeight:"100vh", display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", padding:"1.5rem", fontFamily:"'Noto Serif JP','Georgia',serif", color:"var(--text-main)" },
   stars: { fontSize:"0.75rem", letterSpacing:"0.5rem", color:"#c8a96e", margin:"1rem 0", opacity:0.7 },
-  card: { background:"var(--card-bg)", backdropFilter:"blur(16px)", WebkitBackdropFilter:"blur(16px)", border:"1px solid var(--card-border)", borderRadius:"20px", padding:"2.5rem 2rem", maxWidth:"560px", width:"100%", boxShadow:"0 8px 32px rgba(0,0,0,0.4)", minHeight:"420px", display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center" },
+  card: { position:"relative", background:"var(--card-bg)", backdropFilter:"blur(16px)", WebkitBackdropFilter:"blur(16px)", border:"1px solid var(--card-border)", borderRadius:"20px", padding:"2.5rem 2rem", maxWidth:"560px", width:"100%", boxShadow:"0 8px 32px rgba(0,0,0,0.4)", minHeight:"420px", display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center" },
   fadeIn: { animation:"fadeIn 0.6s ease", width:"100%", display:"flex", flexDirection:"column", alignItems:"center" },
   chapterLabel: { fontSize:"0.69rem", letterSpacing:"0.25rem", color:"#c8a96e", textTransform:"uppercase", marginBottom:"0.8rem", opacity:0.8, fontFamily:"'Noto Sans JP',sans-serif" },
   chapterIntroText: { fontSize:"1.05rem", lineHeight:"2.0", textAlign:"center", color:"var(--text-main)", padding:"0.5rem", fontStyle:"italic", letterSpacing:"0.04em" },
