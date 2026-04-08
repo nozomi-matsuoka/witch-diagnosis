@@ -961,9 +961,11 @@ function App() {
 
       </div>
       <div style={S.stars}>{"✧ ✦ ✧ ✦ ✧ ✦ ✧ ✦ ✧"}</div>
-      <div style={{fontSize:"0.69rem", color:"rgba(200,169,110,0.5)", letterSpacing:"0.1em", marginBottom:"1.5rem", fontFamily:"'Noto Sans JP',sans-serif"}}>
-        <a href="/privacy.html" style={{color:"rgba(200,169,110,0.5)", textDecoration:"none"}}>プライバシーポリシー・利用規約</a>
-      </div>
+      {(step === "intro" || step === "result") && (
+        <div style={{fontSize:"0.69rem", color:"rgba(200,169,110,0.5)", letterSpacing:"0.1em", marginBottom:"1.5rem", fontFamily:"'Noto Sans JP',sans-serif"}}>
+          <a href="/privacy.html" style={{color:"rgba(200,169,110,0.5)", textDecoration:"none"}}>プライバシーポリシー・利用規約</a>
+        </div>
+      )}
     </div>
   );
 }
