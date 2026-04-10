@@ -253,7 +253,7 @@ const QUESTIONS = [
     text:"街の人々の魔女に関する見解はふたつに割れていた。「魔女は悪だ」という者と「魔女は無害だ」という者。",
     a:{ label:"目撃情報や残された証拠を重視して判断する", scores:{S:1},
         reaction:"見えているものをまずは信じる。\n霧のなかでも、足元の石は確かにそこにある。" },
-    b:{ label:"食い違う噂話の背後に隠された真実を探る", scores:{N:1},
+    b:{ label:"どちらの話にも部分的な真実があり、その奥にある何かを直感する", scores:{N:1},
         reaction:"どちらの声にも、\n真実と幻想が混ざり合っている。\nあなたにはなぜか、そう感じられた。" },
   },
   {
@@ -269,7 +269,7 @@ const QUESTIONS = [
     text:"森に入ると道が三叉路に分かれていた。街の人から「北に進めば館に着く」と聞いていたが、木々が空を覆い、方角がわからない。",
     a:{ label:"立ち止まって、計画を練り直す", scores:{J:1},
         reaction:"焦らず、立ち止まる。\n苔の生え方、木の傾き——\n森はいつも、静かに答えを語っている。" },
-    b:{ label:"自分の感覚を信じて、進む道を選ぶ", scores:{P:1},
+    b:{ label:"立ち止まらず、感覚を頼りに歩きながら道を見つける", scores:{P:1},
         reaction:"理屈より先に、足が動いた。\nあなたの直感は、いつも思わぬ道を見つけ出す。" },
   },
   {
@@ -488,6 +488,7 @@ function App() {
       }
     }, 5000);
   }
+  const [isLoading, setIsLoading] = useState(false);
   const [resultType, setResultType] = useState(null);
   const [endingChoice, setEndingChoice] = useState(null);
   const [logs, setLogs] = useState([]);
@@ -617,7 +618,9 @@ function App() {
       setLogs(prev => [...prev, entry]);
       try { window.storage.set("log:" + now.getTime(), JSON.stringify(entry)); } catch(e) {}
       sendResult(entry);
+      setIsLoading(true);
       setStep("result");
+      setTimeout(() => setIsLoading(false), 2800);
     });
   }
 
@@ -712,7 +715,87 @@ function App() {
   return (
     <div style={S.bg} className={`wt-root theme-phase-${getPhase(step)}`}>
       <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@300;400;500&family=Noto+Sans+JP:wght@400&display=swap');
+        @property --col-top { syntax: '<color>'; inherits: false; initial-value: #0f0c29; }
+        @property --col-bot { syntax: '<color>'; inherits: false; initial-value: #302b63; }
+        :root {
+          --col-top: #0f0c29; --col-bot: #302b63;
+          --text-main: #e0d8f0;
+          --btn-bg: rgba(74, 63, 138, 0.3);
+          --btn-border: rgba(185, 166, 255, 0.3);
+          --btn-text: #e0d8f0;
+          --card-bg: rgba(15, 10, 40, 0.55);
+          --card-border: rgba(180, 160, 255, 0.2);
+        }
+        .theme-phase-1 {
+          --col-top: #0f0c29; --col-bot: #302b63;
+          --text-main: #e0d8f0;
+          --btn-bg: rgba(74, 63, 138, 0.3);
+          --btn-border: rgba(185, 166, 255, 0.3);
+          --btn-text: #e0d8f0;
+          --card-bg: rgba(15, 10, 40, 0.55);
+          --card-border: rgba(180, 160, 255, 0.2);
+        }
+        .theme-phase-2 {
+          --col-top: #242054; --col-bot: #4a3f8a;
+          --text-main: #ebe5f5;
+          --btn-bg: rgba(107, 92, 165, 0.35);
+          --btn-border: rgba(185, 166, 255, 0.4);
+          --btn-text: #ebe5f5;
+          --card-bg: rgba(15, 10, 40, 0.55);
+          --card-border: rgba(180, 160, 255, 0.2);
+        }
+        .theme-phase-3 {
+          --col-top: #3a3276; --col-bot: #6b5ca5;
+          --text-main: #f2eefa;
+          --btn-bg: rgba(140, 123, 191, 0.4);
+          --btn-border: rgba(200, 185, 255, 0.5);
+          --btn-text: #f2eefa;
+          --card-bg: rgba(15, 10, 40, 0.55);
+          --card-border: rgba(180, 160, 255, 0.2);
+        }
+        .theme-phase-4 {
+          --col-top: #544894; --col-bot: #8c7bbf;
+          --text-main: #f9f7fc;
+          --btn-bg: rgba(176, 161, 214, 0.45);
+          --btn-border: rgba(220, 210, 255, 0.6);
+          --btn-text: #f9f7fc;
+          --card-bg: rgba(15, 10, 40, 0.55);
+          --card-border: rgba(180, 160, 255, 0.2);
+        }
+        .theme-phase-5 {
+          --col-top: #f6f2ff; --col-bot: #fce8f4;
+          --text-main: #3a2d6f;
+          --btn-bg: linear-gradient(135deg, #3a2d6f 0%, #5b2a4f 100%);
+          --btn-border: rgba(233, 193, 106, 0.4);
+          --btn-text: #e9c16a;
+          --card-bg: rgba(255, 255, 255, 0.75);
+          --card-border: rgba(180, 160, 255, 0.35);
+        }
+        .wt-root {
+          background: linear-gradient(160deg, var(--col-top) 0%, var(--col-bot) 100%);
+          transition: --col-top 1.5s ease-in-out, --col-bot 1.5s ease-in-out;
+        }
+        @keyframes starPulse {
+          0%, 100% { transform: scale(1.2); }
+          50% { transform: scale(1.6); }
+        }
         @keyframes fadeIn { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
+        @keyframes loadingPulse {
+          0%, 100% { transform: scale(1); filter: drop-shadow(0 0 16px rgba(160,100,255,0.5)); }
+          50% { transform: scale(1.18); filter: drop-shadow(0 0 40px rgba(160,100,255,1)) drop-shadow(0 0 60px rgba(200,169,110,0.4)); }
+        }
+        @keyframes loadingFadeIn { from { opacity:0; } to { opacity:1; } }
+        @keyframes loadingFadeOut { from { opacity:1; } to { opacity:0; } }
+        @keyframes floatStar {
+          0% { transform:translateY(0) rotate(0deg) scale(0); opacity:0; }
+          8% { opacity:1; transform:translateY(-8vh) rotate(20deg) scale(1); }
+          85% { opacity:0.5; }
+          100% { transform:translateY(-95vh) rotate(200deg) scale(0.4); opacity:0; }
+        }
+        .wt-particles { position:fixed; inset:0; pointer-events:none; overflow:hidden; opacity:0; transition:opacity 1.2s ease; z-index:0; }
+        .theme-phase-3 .wt-particles, .theme-phase-4 .wt-particles, .theme-phase-5 .wt-particles { opacity:1; }
+        .wt-particle { position:absolute; bottom:-2%; color:#c8a96e; animation:floatStar linear infinite; opacity:0; font-size:0.55rem; }
         /* ===== ホバーエフェクト ===== */
         .wt-optBtn:hover {
           transform: translateY(-2px);
@@ -766,7 +849,7 @@ function App() {
           const progIdx = PROGRESS_STEPS.indexOf(step);
           if (progIdx < 0) return null;
           return (
-            <div style={{position:'absolute', top:'0.75rem', left:'1rem', right:'1rem'}}>
+            <div style={{position:'absolute',top:'0.75rem',left:'1rem',right:'1rem'}}>
               <ProgressIndicator currentIndex={progIdx} phase={getPhase(step)} />
             </div>
           );
@@ -960,12 +1043,38 @@ function App() {
         )}
 
       </div>
-      <div style={S.stars}>{"✧ ✦ ✧ ✦ ✧ ✦ ✧ ✦ ✧"}</div>
-      {(step === "intro" || step === "result") && (
-        <div style={{fontSize:"0.69rem", color:"rgba(200,169,110,0.5)", letterSpacing:"0.1em", marginBottom:"1.5rem", fontFamily:"'Noto Sans JP',sans-serif"}}>
-          <a href="/privacy.html" style={{color:"rgba(200,169,110,0.5)", textDecoration:"none"}}>プライバシーポリシー・利用規約</a>
+      {/* 星パーティクル（Phase 3-5で表示） */}
+      <div className="wt-particles">
+        {[
+          {left:"7%",  delay:"0s",   dur:"9s"},
+          {left:"16%", delay:"1.8s", dur:"11s"},
+          {left:"28%", delay:"3.2s", dur:"8s"},
+          {left:"40%", delay:"0.6s", dur:"10s"},
+          {left:"52%", delay:"5s",   dur:"7.5s"},
+          {left:"63%", delay:"2.4s", dur:"12s"},
+          {left:"74%", delay:"4.1s", dur:"9s"},
+          {left:"85%", delay:"1.2s", dur:"8.5s"},
+          {left:"22%", delay:"6.5s", dur:"10.5s"},
+          {left:"58%", delay:"3.8s", dur:"9.5s"},
+          {left:"36%", delay:"7.2s", dur:"8s"},
+          {left:"91%", delay:"2s",   dur:"11.5s"},
+        ].map((p, i) => (
+          <span key={i} className="wt-particle" style={{left:p.left, animationDelay:p.delay, animationDuration:p.dur}}>✦</span>
+        ))}
+      </div>
+
+      {/* ローディングオーバーレイ（エンディング→結果の演出） */}
+      {isLoading && (
+        <div style={{position:"fixed",inset:0,background:"rgba(5,3,18,0.94)",display:"flex",alignItems:"center",justifyContent:"center",zIndex:9999,flexDirection:"column",gap:"1.5rem",animation:"loadingFadeIn 0.5s ease"}}>
+          <div style={{fontSize:"4.5rem",animation:"loadingPulse 1.6s ease-in-out infinite"}}>🔮</div>
+          <p style={{color:"#c8a96e",fontSize:"0.94rem",lineHeight:"2.2",textAlign:"center",letterSpacing:"0.15em",whiteSpace:"pre-line",fontFamily:"'Noto Serif JP','Georgia',serif",fontStyle:"italic",opacity:0.9}}>{"占いの結果が\n明らかになる……"}</p>
         </div>
       )}
+
+      <div style={S.stars}>{"✧ ✦ ✧ ✦ ✧ ✦ ✧ ✦ ✧"}</div>
+      <div style={{fontSize:"0.69rem", color:"rgba(200,169,110,0.5)", letterSpacing:"0.1em", marginBottom:"1.5rem", fontFamily:"'Noto Sans JP',sans-serif"}}>
+        <a href="/privacy.html" style={{color:"rgba(200,169,110,0.5)", textDecoration:"none"}}>プライバシーポリシー・利用規約</a>
+      </div>
     </div>
   );
 }
@@ -994,19 +1103,13 @@ function FadeIn({ children }) {
 
 // 星座型プログレスインジケーター
 function ProgressIndicator({ currentIndex, phase }) {
-  const total = PROGRESS_STEPS.length;
-  // フェーズに応じた星の色
   const starColor = phase === 5 ? '#e9c16a'
     : phase === 4 ? '#e0d8f0'
     : phase === 3 ? '#c8b9ff'
     : '#b9a6ff';
   const glowColor = phase === 5 ? 'rgba(233,193,106,0.7)' : 'rgba(185,166,255,0.7)';
-
   return (
-    <div style={{
-      display:'flex', alignItems:'center', justifyContent:'center',
-      width:'100%', padding:'0 0.5rem', gap:0,
-    }}>
+    <div style={{display:'flex',alignItems:'center',justifyContent:'center',width:'100%',padding:'0 0.5rem',gap:0}}>
       {PROGRESS_STEPS.map((s, i) => {
         const isAnswered = i < currentIndex;
         const isCurrent = i === currentIndex;
@@ -1014,24 +1117,9 @@ function ProgressIndicator({ currentIndex, phase }) {
         return (
           <React.Fragment key={s}>
             {i > 0 && (
-              <div style={{
-                flex: 1, height: '1px',
-                background: isAnswered ? starColor : 'rgba(255,255,255,0.15)',
-                opacity: isAnswered ? 0.7 : 1,
-                transition: 'background 0.8s ease',
-                minWidth: '2px',
-              }} />
+              <div style={{flex:1,height:'1px',background:isAnswered?starColor:'rgba(255,255,255,0.15)',opacity:isAnswered?0.7:1,transition:'background 0.8s ease',minWidth:'2px'}}/>
             )}
-            <div style={{
-              width: dotSize + 'px', height: dotSize + 'px',
-              borderRadius: '50%',
-              background: (isAnswered || isCurrent) ? starColor : 'rgba(255,255,255,0.15)',
-              opacity: isCurrent ? 1 : isAnswered ? 0.9 : 0.3,
-              boxShadow: (isAnswered || isCurrent) ? `0 0 5px ${glowColor}, 0 0 10px ${glowColor}` : 'none',
-              animation: isCurrent ? 'starPulse 1.8s ease-in-out infinite' : 'none',
-              transition: 'background 0.8s ease, box-shadow 0.8s ease',
-              flexShrink: 0,
-            }} />
+            <div style={{width:dotSize+'px',height:dotSize+'px',borderRadius:'50%',background:(isAnswered||isCurrent)?starColor:'rgba(255,255,255,0.15)',opacity:isCurrent?1:isAnswered?0.9:0.3,boxShadow:(isAnswered||isCurrent)?`0 0 5px ${glowColor}, 0 0 10px ${glowColor}`:'none',animation:isCurrent?'starPulse 1.8s ease-in-out infinite':'none',transition:'background 0.8s ease, box-shadow 0.8s ease',flexShrink:0}}/>
           </React.Fragment>
         );
       })}
@@ -1074,7 +1162,6 @@ const S = {
   jobEmoji: { fontSize:"2rem" },
   jobName: { fontSize:"0.85rem", color:"#c8a96e", letterSpacing:"0.05rem" },
 };
-
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(<App />);
