@@ -8,14 +8,19 @@
 <!-- OGP -->
 <meta property="og:title" content="不思議な森と魔女の館の物語 —— 16タイプ性格診断" />
 <meta property="og:description" content="深い森の奥にひっそりとたたずむ魔女の館。あなたの選択が、魔女の真実を解き明かす。" />
-<meta property="og:image" content="/images/title_main_horizontal.png" />
+<meta property="og:image" content="https://witch-diagnosis.vercel.app/images/title_main_horizontal.png" />
 <meta property="og:type" content="website" />
+<meta property="og:url" content="https://witch-diagnosis.vercel.app" />
 <meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="不思議な森と魔女の館の物語 —— 16タイプ性格診断" />
+<meta name="twitter:description" content="深い森の奥にひっそりとたたずむ魔女の館。あなたの選択が、魔女の真実を解き明かす。" />
+<meta name="twitter:image" content="https://witch-diagnosis.vercel.app/images/title_main_horizontal.png" />
 
 <!-- React 18 CDN -->
 <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
 <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
 <script crossorigin src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -422,6 +427,28 @@ const TYPE_RESULTS = {
 };
 
 // ============================================================
+// SHARE CARD CATCHCOPY
+// ============================================================
+const CATCHCOPY = {
+  INTJ: "孤独なる洞察者",
+  INTP: "静かなる探求者",
+  ENTJ: "未来を見据える者",
+  ENTP: "常識を砕く問いかけ",
+  INFJ: "魂の声を聴く者",
+  INFP: "夢を現実に繋ぐ者",
+  ENFJ: "人の可能性を灯す者",
+  ENFP: "自由を愛する魂",
+  ISTJ: "誠実なる守護者",
+  ISFJ: "愛の番人",
+  ESTJ: "秩序を守る者",
+  ESFJ: "絆を紡ぐ者",
+  ISTP: "孤高の技術者",
+  ISFP: "美を愛でる旅人",
+  ESTP: "勇敢なる冒険者",
+  ESFP: "喜びをもたらす者",
+};
+
+// ============================================================
 // UTILS
 // ============================================================
 function addScores(total, scores) {
@@ -703,6 +730,24 @@ function App() {
     setShownChapters(new Set());
     setShowChapterIntro(false);
     setCurrentChapterIntro(null);
+  }
+
+  function handleShareCard() {
+    const el = document.getElementById('wt-share-card');
+    if (!el || typeof html2canvas === 'undefined') return;
+    html2canvas(el, {
+      scale: 2,
+      useCORS: true,
+      logging: false,
+      backgroundColor: null,
+    }).then(canvas => {
+      const link = document.createElement('a');
+      link.download = 'witch-diagnosis-' + (resultType || 'result') + '.png';
+      link.href = canvas.toDataURL('image/png');
+      link.click();
+    }).catch(err => {
+      console.warn('シェアカード生成エラー:', err);
+    });
   }
 
   function getNextStep(current) {
@@ -1010,6 +1055,9 @@ function App() {
             <p style={S.witchText}>{EPILOGUES[getGroup(resultType)][endingChoice === "a" ? "stay" : "return"]}</p>
             <div style={{display:"flex", gap:"0.8rem", marginTop:"2rem", flexWrap:"wrap", justifyContent:"center"}}>
               <button style={S.btn} className="wt-btn" onClick={restart}>もう一度試す</button>
+              <button style={{...S.btn, background:"linear-gradient(135deg,#3a2d6f 0%,#5b2a4f 100%)", color:"#e9c16a", borderColor:"rgba(233,193,106,0.5)"}} className="wt-btn" onClick={handleShareCard}>
+                📸 シェアカード
+              </button>
               <button style={{...S.btn, fontSize:"0.75rem"}} onClick={() => setShowLogs(v => !v)}>
                 {showLogs ? "ログを隠す" : `結果ログ（${logs.length}件）`}
               </button>
@@ -1043,6 +1091,36 @@ function App() {
         )}
 
       </div>
+
+      {/* SNSシェアカード（オフスクリーン・html2canvas用） */}
+      {step === "result" && typeData && (
+        <div id="wt-share-card" style={{
+          position:"fixed", left:"-9999px", top:"0",
+          width:"1200px", height:"628px",
+          background:"linear-gradient(160deg, #f6f2ff 0%, #fce8f4 100%)",
+          display:"flex", flexDirection:"column",
+          alignItems:"center", justifyContent:"center",
+          fontFamily:"'Noto Serif JP','Georgia',serif",
+          overflow:"hidden",
+        }}>
+          {/* 放射状グロウ */}
+          <div style={{position:"absolute",inset:0,background:"radial-gradient(ellipse at center, rgba(233,193,106,0.18) 0%, transparent 65%)",pointerEvents:"none"}} />
+          {/* 外枠 */}
+          <div style={{position:"absolute",inset:"20px",border:"1px solid rgba(140,123,191,0.3)",borderRadius:"16px",pointerEvents:"none"}} />
+          {/* 四隅の星装飾 */}
+          <div style={{position:"absolute",top:"36px",left:"48px",fontSize:"26px",color:"rgba(140,123,191,0.55)"}}>✦</div>
+          <div style={{position:"absolute",top:"36px",right:"48px",fontSize:"26px",color:"rgba(140,123,191,0.55)"}}>✦</div>
+          <div style={{position:"absolute",bottom:"36px",left:"48px",fontSize:"26px",color:"rgba(140,123,191,0.55)"}}>✦</div>
+          <div style={{position:"absolute",bottom:"36px",right:"48px",fontSize:"26px",color:"rgba(140,123,191,0.55)"}}>✦</div>
+          {/* コンテンツ */}
+          <p style={{fontSize:"13px",color:"#8c7bbf",letterSpacing:"0.35em",marginBottom:"22px",fontFamily:"'Noto Sans JP',sans-serif"}}>不思議な森と魔女の館の物語</p>
+          <p style={{fontSize:"16px",color:"#6b5ca5",letterSpacing:"0.25em",marginBottom:"28px",fontFamily:"'Noto Sans JP',sans-serif"}}>あなたのタイプは</p>
+          <p style={{fontSize:"68px",color:"#3a2d6f",letterSpacing:"0.15em",fontWeight:"300",marginBottom:"18px",textAlign:"center"}}>{"✦ " + typeData.name + " ✦"}</p>
+          <p style={{fontSize:"22px",color:"#5b2a4f",letterSpacing:"0.14em",marginBottom:"28px"}}>{CATCHCOPY[resultType] || ""}</p>
+          <p style={{fontSize:"14px",color:"#8c7bbf",letterSpacing:"0.55em",fontFamily:"'Noto Sans JP',sans-serif"}}>{resultType}</p>
+        </div>
+      )}
+
       {/* 星パーティクル（Phase 3-5で表示） */}
       <div className="wt-particles">
         {[
