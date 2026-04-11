@@ -103,7 +103,8 @@
 
 <!-- ===== Google AdSense =====
   【青さんへ】AdSense審査通過後に以下のコメントを外してください。
-  ca-pub-XXXXXXXXXX の部分をご自身のパブリッシャーIDに差し替えてください。
+  1. ca-pub-XXXXXXXXXX → ご自身のパブリッシャーID に差し替え
+  2. <!-- と --> を外してscriptタグを有効化
 
 <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-XXXXXXXXXX"
      crossorigin="anonymous"></script>
@@ -870,6 +871,43 @@ function App() {
           -webkit-backdrop-filter: blur(20px) !important;
           box-shadow: 0 12px 48px rgba(140,120,200,0.25) !important;
         }
+        /* ===== フェーズ別 選択肢ボタン リデザイン ===== */
+        .theme-phase-1 .wt-optBtn {
+          border-radius: 3px !important;
+        }
+        .theme-phase-2 .wt-optBtn {
+          border-radius: 8px !important;
+        }
+        .theme-phase-3 .wt-optBtn {
+          border-radius: 14px !important;
+          box-shadow: 0 0 14px rgba(140,123,191,0.18);
+        }
+        .theme-phase-3 .wt-optBtn:hover {
+          box-shadow: 0 6px 22px rgba(140,123,191,0.45);
+        }
+        .theme-phase-4 .wt-optBtn {
+          border-radius: 18px !important;
+          box-shadow: 0 2px 18px rgba(180,161,214,0.22), inset 0 1px 0 rgba(255,255,255,0.07);
+        }
+        .theme-phase-4 .wt-optBtn:hover {
+          box-shadow: 0 6px 28px rgba(180,161,214,0.55), 0 0 28px rgba(180,161,214,0.3);
+        }
+        /* ===== 霧エフェクト CSS (Phase 1-2) ===== */
+        @keyframes fogDrift1 {
+          0%   { transform: translateX(-20%) translateY(0px);   opacity: 0; }
+          15%  { opacity: 1; }
+          85%  { opacity: 0.8; }
+          100% { transform: translateX(120%) translateY(-12px); opacity: 0; }
+        }
+        @keyframes fogDrift2 {
+          0%   { transform: translateX(120%) translateY(0px);  opacity: 0; }
+          15%  { opacity: 0.8; }
+          85%  { opacity: 0.6; }
+          100% { transform: translateX(-20%) translateY(10px); opacity: 0; }
+        }
+        .wt-fog { position:fixed; inset:0; pointer-events:none; overflow:hidden; z-index:0; opacity:0; transition:opacity 2s ease; }
+        .theme-phase-1 .wt-fog, .theme-phase-2 .wt-fog { opacity:1; }
+        .wt-fog-puff { position:absolute; border-radius:50%; filter:blur(38px); }
         @media (max-width: 480px) {
           .wt-card { padding: 1.5rem 1rem !important; }
           .wt-title { font-size: 1.3rem !important; margin-bottom: 0.6rem !important; }
@@ -1087,6 +1125,19 @@ function App() {
                 </button>
               </div>
             )}
+          {/* ===== 広告スロット（診断結果ページ） ===== */}
+          {/* 【青さんへ】AdSense承認後にコメントを外してください */}
+          {/* data-ad-client → パブリッシャーID / data-ad-slot → 広告ユニットID に差し替え */}
+          {/*
+          <div style={{width:"100%",margin:"1.5rem 0 0",textAlign:"center",minHeight:"90px"}}>
+            <ins className="adsbygoogle"
+              style={{display:"block"}}
+              data-ad-client="ca-pub-XXXXXXXXXX"
+              data-ad-slot="YYYYYYYYYY"
+              data-ad-format="auto"
+              data-full-width-responsive="true" />
+          </div>
+          */}
           </FadeIn>
         )}
 
@@ -1120,6 +1171,23 @@ function App() {
           <p style={{fontSize:"14px",color:"#8c7bbf",letterSpacing:"0.55em",fontFamily:"'Noto Sans JP',sans-serif"}}>{resultType}</p>
         </div>
       )}
+
+      {/* 霧エフェクト（Phase 1-2で表示） */}
+      <div className="wt-fog">
+        {[
+          {top:"58%",  w:"380px", h:"85px",  c:"rgba(175,165,230,0.06)", a:"fogDrift1", d:"28s",  delay:"0s"},
+          {top:"70%",  w:"480px", h:"105px", c:"rgba(155,145,210,0.05)", a:"fogDrift2", d:"36s",  delay:"5s"},
+          {top:"52%",  w:"290px", h:"72px",  c:"rgba(195,182,238,0.05)", a:"fogDrift1", d:"22s",  delay:"13s"},
+          {top:"78%",  w:"520px", h:"125px", c:"rgba(135,125,200,0.04)", a:"fogDrift2", d:"42s",  delay:"9s"},
+          {top:"64%",  w:"340px", h:"92px",  c:"rgba(185,172,234,0.06)", a:"fogDrift1", d:"31s",  delay:"20s"},
+        ].map((f,i) => (
+          <div key={i} className="wt-fog-puff" style={{
+            top:f.top, width:f.w, height:f.h,
+            background:`radial-gradient(ellipse at center, ${f.c} 0%, transparent 70%)`,
+            animation:`${f.a} ${f.d} linear ${f.delay} infinite`,
+          }}/>
+        ))}
+      </div>
 
       {/* 星パーティクル（Phase 3-5で表示） */}
       <div className="wt-particles">
